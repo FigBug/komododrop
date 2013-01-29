@@ -1,0 +1,1 @@
+premake --file smugmug.lua --cc gcc --target gnu

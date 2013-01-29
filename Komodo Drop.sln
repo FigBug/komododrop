@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Smugmug", "Smugmug.vcxproj", "{0543024E-5F6E-4211-8D0C-B70882744B0C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA} = {6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "juce", "..\JUCE\extras\static library\Builds\VisualStudio2010\juce.vcxproj", "{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		DLL Debug|Win32 = DLL Debug|Win32
+		DLL Release|Win32 = DLL Release|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0543024E-5F6E-4211-8D0C-B70882744B0C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0543024E-5F6E-4211-8D0C-B70882744B0C}.Debug|Win32.Build.0 = Debug|Win32
+		{0543024E-5F6E-4211-8D0C-B70882744B0C}.DLL Debug|Win32.ActiveCfg = Debug|Win32
+		{0543024E-5F6E-4211-8D0C-B70882744B0C}.DLL Debug|Win32.Build.0 = Debug|Win32
+		{0543024E-5F6E-4211-8D0C-B70882744B0C}.DLL Release|Win32.ActiveCfg = Release|Win32
+		{0543024E-5F6E-4211-8D0C-B70882744B0C}.DLL Release|Win32.Build.0 = Release|Win32
+		{0543024E-5F6E-4211-8D0C-B70882744B0C}.Release|Win32.ActiveCfg = Release|Win32
+		{0543024E-5F6E-4211-8D0C-B70882744B0C}.Release|Win32.Build.0 = Release|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.Debug|Win32.Build.0 = Debug|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.DLL Debug|Win32.ActiveCfg = Debug|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.DLL Debug|Win32.Build.0 = Debug|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.DLL Release|Win32.ActiveCfg = Release|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.DLL Release|Win32.Build.0 = Release|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.Release|Win32.ActiveCfg = Release|Win32
+		{6C6FE871-80B5-5611-1C8D-17A6CCA9ADFA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

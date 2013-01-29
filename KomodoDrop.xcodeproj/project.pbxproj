@@ -1,0 +1,325 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		781988D3107A2180006CD3F3 /* libjucedebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 781988D2107A2180006CD3F3 /* libjucedebug.a */; };
+		781988FB107A22AA006CD3F3 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 781988FA107A22AA006CD3F3 /* OpenGL.framework */; };
+		78198903107A22D0006CD3F3 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78198902107A22D0006CD3F3 /* Cocoa.framework */; };
+		785368F20C204E21003C0136 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 785368E50C204E21003C0136 /* App.cpp */; };
+		785368F30C204E21003C0136 /* Settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 785368E60C204E21003C0136 /* Settings.cpp */; };
+		785368F40C204E21003C0136 /* SettingsComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 785368E80C204E21003C0136 /* SettingsComponent.cpp */; };
+		785368F50C204E21003C0136 /* Smugmug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 785368EA0C204E21003C0136 /* Smugmug.cpp */; };
+		785368F60C204E21003C0136 /* stdafx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 785368EC0C204E21003C0136 /* stdafx.cpp */; };
+		785368F70C204E21003C0136 /* UploadComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 785368EE0C204E21003C0136 /* UploadComponent.cpp */; };
+		785368F80C204E21003C0136 /* UploadWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 785368F00C204E21003C0136 /* UploadWindow.cpp */; };
+		7853695F0C205176003C0136 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7853695E0C205176003C0136 /* IOKit.framework */; };
+		785369610C20518F003C0136 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 785369600C20518F003C0136 /* CoreAudio.framework */; };
+		785369950C2057C3003C0136 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 785369940C2057C3003C0136 /* AGL.framework */; };
+		78548C160D982DD0006B273B /* Target.icns in Resources */ = {isa = PBXBuildFile; fileRef = 78548C150D982DD0006B273B /* Target.icns */; };
+		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
+		8D0C4E8E0486CD37000505A6 /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = 02345980000FD03B11CA0E72 /* main.nib */; };
+		8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20286C33FDCF999611CA2CEA /* Carbon.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0867D6ABFE840B52C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1870340FFE93FCAF11CA0CD7 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
+		20286C33FDCF999611CA2CEA /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		4A9504C8FFE6A3BC11CA0CBA /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
+		4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		5048396D09E3307300765E4B /* KomodoDropProj.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = KomodoDropProj.xcconfig; sourceTree = "<group>"; };
+		5048396E09E3307300765E4B /* KomodoDropTarget.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = KomodoDropTarget.xcconfig; sourceTree = "<group>"; };
+		781988D2107A2180006CD3F3 /* libjucedebug.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjucedebug.a; path = ../juce/bin/libjucedebug.a; sourceTree = SOURCE_ROOT; };
+		781988FA107A22AA006CD3F3 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
+		78198902107A22D0006CD3F3 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		785368E50C204E21003C0136 /* App.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = App.cpp; sourceTree = "<group>"; };
+		785368E60C204E21003C0136 /* Settings.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Settings.cpp; sourceTree = "<group>"; };
+		785368E70C204E21003C0136 /* Settings.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Settings.h; sourceTree = "<group>"; };
+		785368E80C204E21003C0136 /* SettingsComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = SettingsComponent.cpp; sourceTree = "<group>"; };
+		785368E90C204E21003C0136 /* SettingsComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SettingsComponent.h; sourceTree = "<group>"; };
+		785368EA0C204E21003C0136 /* Smugmug.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = Smugmug.cpp; sourceTree = "<group>"; };
+		785368EB0C204E21003C0136 /* Smugmug.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Smugmug.h; sourceTree = "<group>"; };
+		785368EC0C204E21003C0136 /* stdafx.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = stdafx.cpp; sourceTree = "<group>"; };
+		785368ED0C204E21003C0136 /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = stdafx.h; sourceTree = "<group>"; };
+		785368EE0C204E21003C0136 /* UploadComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = UploadComponent.cpp; sourceTree = "<group>"; };
+		785368EF0C204E21003C0136 /* UploadComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UploadComponent.h; sourceTree = "<group>"; };
+		785368F00C204E21003C0136 /* UploadWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = UploadWindow.cpp; sourceTree = "<group>"; };
+		785368F10C204E21003C0136 /* UploadWindow.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UploadWindow.h; sourceTree = "<group>"; };
+		785369340C2050CE003C0136 /* libjuce.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjuce.a; path = ../juce/bin/libjuce.a; sourceTree = SOURCE_ROOT; };
+		7853695E0C205176003C0136 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
+		785369600C20518F003C0136 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
+		785369910C205773003C0136 /* KomodoDrop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KomodoDrop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		785369940C2057C3003C0136 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
+		78548C150D982DD0006B273B /* Target.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Target.icns; sourceTree = "<group>"; };
+		8D0C4E960486CD37000505A6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8D0C4E910486CD37000505A6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */,
+				7853695F0C205176003C0136 /* IOKit.framework in Frameworks */,
+				785369610C20518F003C0136 /* CoreAudio.framework in Frameworks */,
+				785369950C2057C3003C0136 /* AGL.framework in Frameworks */,
+				781988D3107A2180006CD3F3 /* libjucedebug.a in Frameworks */,
+				781988FB107A22AA006CD3F3 /* OpenGL.framework in Frameworks */,
+				78198903107A22D0006CD3F3 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		195DF8CFFE9D517E11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				785369910C205773003C0136 /* KomodoDrop.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		20286C29FDCF999611CA2CEA /* KomodoDrop */ = {
+			isa = PBXGroup;
+			children = (
+				5048396909E3304600765E4B /* Configuration Files */,
+				20286C2AFDCF999611CA2CEA /* Sources */,
+				20286C2CFDCF999611CA2CEA /* Resources */,
+				20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */,
+				195DF8CFFE9D517E11CA2CBB /* Products */,
+			);
+			name = KomodoDrop;
+			sourceTree = "<group>";
+		};
+		20286C2AFDCF999611CA2CEA /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				785368E50C204E21003C0136 /* App.cpp */,
+				785368E60C204E21003C0136 /* Settings.cpp */,
+				785368E70C204E21003C0136 /* Settings.h */,
+				785368E80C204E21003C0136 /* SettingsComponent.cpp */,
+				785368E90C204E21003C0136 /* SettingsComponent.h */,
+				785368EA0C204E21003C0136 /* Smugmug.cpp */,
+				785368EB0C204E21003C0136 /* Smugmug.h */,
+				785368EC0C204E21003C0136 /* stdafx.cpp */,
+				785368ED0C204E21003C0136 /* stdafx.h */,
+				785368EE0C204E21003C0136 /* UploadComponent.cpp */,
+				785368EF0C204E21003C0136 /* UploadComponent.h */,
+				785368F00C204E21003C0136 /* UploadWindow.cpp */,
+				785368F10C204E21003C0136 /* UploadWindow.h */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		20286C2CFDCF999611CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				78548C150D982DD0006B273B /* Target.icns */,
+				8D0C4E960486CD37000505A6 /* Info.plist */,
+				0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */,
+				02345980000FD03B11CA0E72 /* main.nib */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				781988D2107A2180006CD3F3 /* libjucedebug.a */,
+				785369940C2057C3003C0136 /* AGL.framework */,
+				785369600C20518F003C0136 /* CoreAudio.framework */,
+				7853695E0C205176003C0136 /* IOKit.framework */,
+				785369340C2050CE003C0136 /* libjuce.a */,
+				20286C33FDCF999611CA2CEA /* Carbon.framework */,
+				4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */,
+				4A9504C8FFE6A3BC11CA0CBA /* ApplicationServices.framework */,
+				781988FA107A22AA006CD3F3 /* OpenGL.framework */,
+				78198902107A22D0006CD3F3 /* Cocoa.framework */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		5048396909E3304600765E4B /* Configuration Files */ = {
+			isa = PBXGroup;
+			children = (
+				5048396D09E3307300765E4B /* KomodoDropProj.xcconfig */,
+				5048396E09E3307300765E4B /* KomodoDropTarget.xcconfig */,
+			);
+			name = "Configuration Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8D0C4E890486CD37000505A6 /* KomodoDrop */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0E91AC508A95435008D54AB /* Build configuration list for PBXNativeTarget "KomodoDrop" */;
+			buildPhases = (
+				8D0C4E8C0486CD37000505A6 /* Resources */,
+				8D0C4E8F0486CD37000505A6 /* Sources */,
+				8D0C4E910486CD37000505A6 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KomodoDrop;
+			productInstallPath = "$(HOME)/Applications";
+			productName = KomodoDrop;
+			productReference = 785369910C205773003C0136 /* KomodoDrop.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		20286C28FDCF999611CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "KomodoDrop" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 1;
+			mainGroup = 20286C29FDCF999611CA2CEA /* KomodoDrop */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8D0C4E890486CD37000505A6 /* KomodoDrop */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8D0C4E8C0486CD37000505A6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */,
+				8D0C4E8E0486CD37000505A6 /* main.nib in Resources */,
+				78548C160D982DD0006B273B /* Target.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D0C4E8F0486CD37000505A6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				785368F20C204E21003C0136 /* App.cpp in Sources */,
+				785368F30C204E21003C0136 /* Settings.cpp in Sources */,
+				785368F40C204E21003C0136 /* SettingsComponent.cpp in Sources */,
+				785368F50C204E21003C0136 /* Smugmug.cpp in Sources */,
+				785368F60C204E21003C0136 /* stdafx.cpp in Sources */,
+				785368F70C204E21003C0136 /* UploadComponent.cpp in Sources */,
+				785368F80C204E21003C0136 /* UploadWindow.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		02345980000FD03B11CA0E72 /* main.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1870340FFE93FCAF11CA0CD7 /* English */,
+			);
+			name = main.nib;
+			sourceTree = "<group>";
+		};
+		0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0867D6ABFE840B52C02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C0E91AC608A95435008D54AB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5048396E09E3307300765E4B /* KomodoDropTarget.xcconfig */;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../juce/bin\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../juce/bin\"";
+			};
+			name = Debug;
+		};
+		C0E91AC708A95435008D54AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5048396E09E3307300765E4B /* KomodoDropTarget.xcconfig */;
+			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../juce/bin\"";
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../juce/bin\"";
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
+			};
+			name = Release;
+		};
+		C0E91ACA08A95435008D54AB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5048396D09E3307300765E4B /* KomodoDropProj.xcconfig */;
+			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		C0E91ACB08A95435008D54AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5048396D09E3307300765E4B /* KomodoDropProj.xcconfig */;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				SEPARATE_STRIP = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C0E91AC508A95435008D54AB /* Build configuration list for PBXNativeTarget "KomodoDrop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0E91AC608A95435008D54AB /* Debug */,
+				C0E91AC708A95435008D54AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "KomodoDrop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0E91ACA08A95435008D54AB /* Debug */,
+				C0E91ACB08A95435008D54AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 20286C28FDCF999611CA2CEA /* Project object */;
+}
