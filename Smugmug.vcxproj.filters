@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Juce">
+      <UniqueIdentifier>{1a15b6c8-7d0c-4188-8678-ea8a8e552be6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -35,6 +38,27 @@
     </ClCompile>
     <ClCompile Include="UploadWindow.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_core\juce_core.cpp">
+      <Filter>Juce</Filter>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_data_structures\juce_data_structures.cpp">
+      <Filter>Juce</Filter>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_events\juce_events.cpp">
+      <Filter>Juce</Filter>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_graphics\juce_graphics.cpp">
+      <Filter>Juce</Filter>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_gui_basics\juce_gui_basics.cpp">
+      <Filter>Juce</Filter>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_cryptography\juce_cryptography.cpp">
+      <Filter>Juce</Filter>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_gui_extra\juce_gui_extra.cpp">
+      <Filter>Juce</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +85,27 @@
     </ClInclude>
     <ClInclude Include="AppConfig.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\JUCE\modules\juce_core\juce_core.h">
+      <Filter>Juce</Filter>
+    </ClInclude>
+    <ClInclude Include="..\JUCE\modules\juce_data_structures\juce_data_structures.h">
+      <Filter>Juce</Filter>
+    </ClInclude>
+    <ClInclude Include="..\JUCE\modules\juce_events\juce_events.h">
+      <Filter>Juce</Filter>
+    </ClInclude>
+    <ClInclude Include="..\JUCE\modules\juce_graphics\juce_graphics.h">
+      <Filter>Juce</Filter>
+    </ClInclude>
+    <ClInclude Include="..\JUCE\modules\juce_gui_basics\juce_gui_basics.h">
+      <Filter>Juce</Filter>
+    </ClInclude>
+    <ClInclude Include="..\JUCE\modules\juce_cryptography\juce_cryptography.h">
+      <Filter>Juce</Filter>
+    </ClInclude>
+    <ClInclude Include="..\JUCE\modules\juce_gui_extra\juce_gui_extra.h">
+      <Filter>Juce</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

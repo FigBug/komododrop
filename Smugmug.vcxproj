@@ -55,9 +55,10 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>.</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;jucedebug.lib;Gdi32.lib;OleAut32.lib;Ole32.lib;Shell32.lib;Comdlg32.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;Gdi32.lib;OleAut32.lib;Ole32.lib;Shell32.lib;Comdlg32.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -71,9 +72,10 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>.</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;juce.lib;Gdi32.lib;OleAut32.lib;Ole32.lib;Shell32.lib;Comdlg32.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;Gdi32.lib;OleAut32.lib;Ole32.lib;Shell32.lib;Comdlg32.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -84,6 +86,34 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\JUCE\modules\juce_core\juce_core.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_cryptography\juce_cryptography.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_data_structures\juce_data_structures.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_events\juce_events.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_graphics\juce_graphics.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_gui_basics\juce_gui_basics.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\JUCE\modules\juce_gui_extra\juce_gui_extra.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="SettingsComponent.cpp" />
@@ -96,6 +126,13 @@
     <ClCompile Include="UploadWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\JUCE\modules\juce_core\juce_core.h" />
+    <ClInclude Include="..\JUCE\modules\juce_cryptography\juce_cryptography.h" />
+    <ClInclude Include="..\JUCE\modules\juce_data_structures\juce_data_structures.h" />
+    <ClInclude Include="..\JUCE\modules\juce_events\juce_events.h" />
+    <ClInclude Include="..\JUCE\modules\juce_graphics\juce_graphics.h" />
+    <ClInclude Include="..\JUCE\modules\juce_gui_basics\juce_gui_basics.h" />
+    <ClInclude Include="..\JUCE\modules\juce_gui_extra\juce_gui_extra.h" />
     <ClInclude Include="AppConfig.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="SettingsComponent.h" />

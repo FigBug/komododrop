@@ -39,7 +39,7 @@ public:
 
     const String getApplicationVersion()
     {
-        return ("0.0.0.4");
+        return ("0.0.0.5");
     }
 	
 	void anotherInstanceStarted (const String& commandLine)

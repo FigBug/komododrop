@@ -106,10 +106,12 @@ public:
 	QueueDialog(SmugMug* smugMug_) : DialogWindow(("Komodo Drop"), Colours::white, true), smugMug(smugMug_)
 	{
 		centreWithSize(600, 450);
-		setContentOwned(tree = new TreeView(), true);
+		tree = new TreeView();
+		tree->setSize(600, 450);
 		tree->setRootItemVisible(false);
 		tree->setDefaultOpenness(true);
 		tree->setRootItem(new RootItem(smugMug));
+		setContentOwned(tree, true);
 		setVisible(true);
 		startTimer(333);
 	}
@@ -145,7 +147,9 @@ public:
 	LogDialog(SmugMug* smugMug_) : DialogWindow(("Komodo Drop"), Colours::white, true), smugMug(smugMug_)
 	{
 		centreWithSize(600, 450);
-		setContentOwned(list = new ListBox(String::empty, this), true);
+		list = new ListBox(String::empty, this);
+		list->setSize(600, 450);
+		setContentOwned(list, true);
 		list->updateContent();
 		list->setVisible(true);
 		setVisible(true);
@@ -474,6 +478,7 @@ bool SmugMug::getImageUrls(SmugID id, ImageUrls& urls)
 	StringPairArray params;
 	params.set(("ImageID"), String(id.id));
 	params.set(("ImageKey"), id.key);
+	params.set(("Password"), "");
 	XmlElement* n = smugMugRequest(("smugmug.images.getURLs"), params);
 
 	if (n)
@@ -990,20 +995,52 @@ SmugID SmugMug::uploadFile(int queue, int index)
 			if (response.endsWith(("\r\n\r\n")) || response.endsWith(("\n\n")))
 			{
 				String len = response.fromFirstOccurrenceOf(("Content-Length: "), false, true);
-				String num;
+				if (len.isNotEmpty())
+				{
+					// normal mode
+					String num;
 
-				int i = 0;
-				while (CharacterFunctions::isDigit(len[i]))
-					num += len[i++];
+					int i = 0;
+					while (CharacterFunctions::isDigit(len[i]))
+						num += len[i++];
 					
-				int bytes = num.getIntValue();
+					int bytes = num.getIntValue();
 
-				char* buffer = new char[bytes + 1];
-				soc.read(buffer, bytes, true);
-				buffer[bytes] = 0;
+					char* buffer = new char[bytes + 1];
+					soc.read(buffer, bytes, true);
+					buffer[bytes] = 0;
 
-				response += buffer;
-				delete[] buffer;
+					response += buffer;
+					delete[] buffer;
+				}
+				else
+				{
+					// chunked
+					while (1)
+					{
+						String line;
+						char ch;
+						while (!line.endsWith("\r\n"))
+						{
+							soc.read(&ch, 1, true);
+							line += ch;
+						}
+
+						int sz = line.getHexValue32();
+						if (sz == 0)
+							break;
+
+						char* buf = new char[sz + 1];
+						soc.read(buf, sz, true);
+						buf[sz] = 0;
+
+						response += buf;
+						delete buf;
+
+						soc.read(&ch, 1, true);
+						soc.read(&ch, 1, true);
+					}
+				}
 
 #ifdef JUCE_DEBUG				
 				Logger::outputDebugString(response);
