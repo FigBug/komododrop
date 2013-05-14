@@ -16,7 +16,9 @@ public:
     }
 
     void initialise (const String& commandLine)
-    {	
+    {
+        Logger::outputDebugString(commandLine);
+        
 		LookAndFeel::setDefaultLookAndFeel(&lf);
         mainWindow = new UploadWindow();
 		

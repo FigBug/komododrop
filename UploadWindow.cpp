@@ -557,7 +557,8 @@ void UploadWindow::filesDropped(const StringArray& filenames, int mouseX, int mo
 	UploadRequest* ur = new UploadRequest();
 	for (int i = 0; i < filenames.size(); i++)
 	{
-		File imageFile(filenames[i]);
+		File imageFile(File::getCurrentWorkingDirectory().getChildFile (filenames[i]));
+        
 		if (imageFile.existsAsFile() && extensions.contains(imageFile.getFileExtension(), true))
 		{
 			ur->addImageFile(imageFile);
