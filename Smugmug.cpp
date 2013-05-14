@@ -290,9 +290,13 @@ bool UploadRequest::getIgnore()
 class DupeThread : public Thread, public AsyncUpdater
 {
 public:
-	DupeThread(SmugMug* smugmug_, UploadRequest* ur_) : Thread(("DupesThread")), smugmug(smugmug_), ur(ur_)
+	DupeThread(SmugMug* smugmug_, UploadRequest* ur_)
+      : Thread(("DupesThread")), 
+        smugmug(smugmug_), 
+        ur(ur_)
 	{
 	}
+
 	~DupeThread()
 	{
 	}
@@ -335,16 +339,18 @@ public:
 		}
 		smugmug->lock.exit();
 
-		smugmug->uploadImages(ur, false);
-		triggerAsyncUpdate();
+		smugmug->uploadImages(ur, false);		
 
 		smugmug->lock.enter();
 		smugmug->dupeThreads.removeFirstMatchingValue(this);
 		smugmug->lock.exit();
+
+        triggerAsyncUpdate();
 	}
 
 	void handleAsyncUpdate()
 	{
+        stopThread(100);
 		delete this;
 	}
 
