@@ -1060,6 +1060,7 @@ SmugID SmugMug::uploadFile(int queue, int index)
 						{
 							uf.status = UploadFile::Finished;
 							uf.complete = 1.0f;
+							uf.url = image->getStringAttribute("URL");
 
 							Time end = Time::getCurrentTime();
 							RelativeTime diff = end - start;
@@ -1314,6 +1315,7 @@ void UploadThread::run()
 		if (ur->getOpenBrowser())
 		{
 			bool done = true;
+			String url;
 			for (int i = 0; i < ur->getNumImages(); i++)
 			{
 				UploadFile& uf = ur->getImageFileInfo(i);
@@ -1322,18 +1324,14 @@ void UploadThread::run()
 					done = false;
 					break;
 				}
-			}
-			if (done)
-			{
-				if (id.id != -1)
+				else if (url.isEmpty())
 				{
-					ImageUrls urls;
-					if (smugMug->getImageUrls(id, urls))
-					{
-						if (urls.albumURL.isNotEmpty())
-							URL(urls.albumURL).launchInDefaultBrowser();
-					}
+					url = uf.url;
 				}
+			}
+			if (done && url.isNotEmpty())
+			{
+				URL(url).launchInDefaultBrowser();
 			}
 		}
 	}

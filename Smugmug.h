@@ -29,6 +29,7 @@ public:
 	float complete;
 	Status status;
 	SmugID id;
+	String url;
 };
 
 class UploadRequest
