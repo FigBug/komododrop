@@ -18,5 +18,5 @@ Komodo Drop is still beta software; however, it is stable and full featured. It 
 Downloads
 =========
 
-Version 0.0.0.5:
+Version 0.0.0.5:  
 http://downloads.rabien.com/KomodoDrop.exe
