@@ -19,4 +19,5 @@ Downloads
 =========
 
 Version 0.0.0.5:  
-http://downloads.rabien.com/KomodoDrop.exe
+Windows: http://downloads.rabien.com/KomodoDrop.exe
+Mac OS X: http://downloads.rabien.com/KomodoDrop.zip
