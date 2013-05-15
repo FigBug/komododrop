@@ -3,14 +3,14 @@
 
 [Setup]
 AppName=KomodoDrop
-AppVerName=KomodoDrop v0.0.0.3
+AppVerName=KomodoDrop v0.0.0.5
 AppPublisher=Roland Rabien
 AppPublisherURL=http://komodo.rabien.com/
 AppSupportURL=http://komodo.rabien.com/
 AppUpdatesURL=http://komodo.rabien.com/
 DefaultDirName={pf}\KomodoDrop
 DefaultGroupName=KomodoDrop
-OutputDir=C:\Documents and Settings\rrabien\Desktop
+OutputDir=C:\Documents and Settings\roland\Desktop
 OutputBaseFilename=KomodoDrop
 Compression=lzma
 SolidCompression=yes
@@ -23,7 +23,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\dev\Mine\Smugmug\Release\KomodoDrop.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Release\KomodoDrop.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
