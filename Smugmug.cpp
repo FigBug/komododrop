@@ -1285,6 +1285,7 @@ UploadThread::UploadThread(SmugMug* smugMug_)
 
 UploadThread::~UploadThread()
 {
+    stopThread(100);
 }
 
 void  UploadThread::handleAsyncUpdate()

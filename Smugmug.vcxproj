@@ -14,7 +14,7 @@
     <ProjectGuid>{0543024E-5F6E-4211-8D0C-B70882744B0C}</ProjectGuid>
     <RootNamespace>Smugmug</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>Komodo Drop</ProjectName>
+    <ProjectName>KomodoDrop</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -63,7 +63,6 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalLibraryDirectories>..\JUCE\extras\static library\Builds\VisualStudio2010\Debug</AdditionalLibraryDirectories>
-      <OutputFile>$(OutDir)KomodoDrop$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -77,7 +76,6 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>kernel32.lib;Gdi32.lib;OleAut32.lib;Ole32.lib;Shell32.lib;Comdlg32.lib</AdditionalDependencies>
-      <OutputFile>$(OutDir)KomodoDrop$(TargetExt)</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
