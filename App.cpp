@@ -36,12 +36,12 @@ public:
 
     const String getApplicationName()
     {
-        return ("Komodo Drop for Smugmug");
+        return ("KomodoDrop for Smugmug");
     }
 
     const String getApplicationVersion()
     {
-        return ("0.0.0.5");
+        return ("0.0.0.6");
     }
 	
 	void anotherInstanceStarted (const String& commandLine)

@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=KomodoDrop
-AppVerName=KomodoDrop v0.0.0.5
+AppVerName=KomodoDrop v0.0.0.6
 AppPublisher=Roland Rabien
 AppPublisherURL=http://komodo.rabien.com/
 AppSupportURL=http://komodo.rabien.com/
