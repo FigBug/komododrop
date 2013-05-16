@@ -922,15 +922,16 @@ SmugID SmugMug::uploadFile(int queue, int index)
 	startTimer(LOGOUT_TIMER);
 
 	String headers;
-	headers = "PUT http://upload.smugmug.com/" + uf.file.getFileName() + " HTTP/1.1\r\n" +
+    String filename = uf.file.getFileName();
+    headers = "PUT http://upload.smugmug.com/" + URL::addEscapeChars(filename, false) + " HTTP/1.1\r\n" +
 		      "Host: upload.smugmug.com\r\n" +
 			  "Content-Length: " + String(uf.file.getSize()) + "\r\n" +
 		      "Content-MD5: " + md5.toHexString() + "\r\n" +
 			  "X-Smug-SessionID: " + sessionId + "\r\n" +
-			  "X-Smug-Version: 1.2.0\r\n" +
+			  "X-Smug-Version: 1.2.2\r\n" +
 			  "X-Smug-ResponseType: REST\r\n" +
 			  "X-Smug-AlbumID: " + String(uploadQueue[queue]->getAlbumId().id) + "\r\n" +
-			  "X-Smug-FileName: " + uf.file.getFileName() + "\r\n\r\n";
+			  "X-Smug-FileName: " + filename + "\r\n\r\n";
 
 #ifdef JUCE_DEBUG
 	Logger::outputDebugString(headers);
