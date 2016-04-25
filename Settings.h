@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../JuceLibraryCode/JuceHeader.h"
+
 class Settings : public DeletedAtShutdown
 {
 public:

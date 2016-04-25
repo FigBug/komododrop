@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "Smugmug.h"
 
 class UploadDialog : public DialogWindow

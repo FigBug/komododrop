@@ -23,6 +23,7 @@
 #define __JUCER_HEADER_UPLOADCOMPONENT_UPLOADCOMPONENT_4A2BDB32__
 
 //[Headers]     -- You can add your own extra header files here --
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "Smugmug.h"
 //[/Headers]
 

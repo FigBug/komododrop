@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="BfPNws" name="KomodoDrop" projectType="guiapp" version="0.0.0.7"
+              bundleIdentifier="com.rabien.KomodoDrop" includeBinaryInAppConfig="1"
+              jucerVersion="4.2.1" companyName="Roland Rabien" companyWebsite="www.rabien.com"
+              companyEmail="roland@rabien.com">
+  <MAINGROUP id="xFAg2F" name="KomodoDrop">
+    <GROUP id="{08F052BB-2485-AB27-517E-65FC7C27E1F5}" name="Source">
+      <FILE id="VlS6bB" name="App.cpp" compile="1" resource="0" file="App.cpp"/>
+      <FILE id="IErsbD" name="Settings.cpp" compile="1" resource="0" file="Settings.cpp"/>
+      <FILE id="hM7Ck5" name="Settings.h" compile="0" resource="0" file="Settings.h"/>
+      <FILE id="lDGFvb" name="SettingsComponent.cpp" compile="1" resource="0"
+            file="SettingsComponent.cpp"/>
+      <FILE id="BLfaHv" name="SettingsComponent.h" compile="0" resource="0"
+            file="SettingsComponent.h"/>
+      <FILE id="s3ZYPc" name="Smugmug.cpp" compile="1" resource="0" file="Smugmug.cpp"/>
+      <FILE id="bjWYfN" name="Smugmug.h" compile="0" resource="0" file="Smugmug.h"/>
+      <FILE id="bylcTD" name="Target.png" compile="0" resource="1" file="Target.png"/>
+      <FILE id="JTKDDB" name="UploadComponent.cpp" compile="1" resource="0"
+            file="UploadComponent.cpp"/>
+      <FILE id="vXsx17" name="UploadComponent.h" compile="0" resource="0"
+            file="UploadComponent.h"/>
+      <FILE id="IDBr3c" name="UploadWindow.cpp" compile="1" resource="0"
+            file="UploadWindow.cpp"/>
+      <FILE id="UTKPnP" name="UploadWindow.h" compile="0" resource="0" file="UploadWindow.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="bylcTD" bigIcon="bylcTD">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="KomodoDrop"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="KomodoDrop"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <VS2013 targetFolder="Builds/VisualStudio2013" smallIcon="bylcTD" bigIcon="bylcTD">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="KomodoDrop"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="3" targetName="KomodoDrop"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2013>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0"/>
+  </MODULES>
+  <JUCEOPTIONS/>
+</JUCERPROJECT>

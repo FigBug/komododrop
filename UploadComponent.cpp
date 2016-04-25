@@ -20,7 +20,6 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "stdafx.h"
 #include "UploadWindow.h"
 #include "Settings.h"
 //[/Headers]
@@ -335,9 +334,9 @@ UploadComponent::UploadComponent (UploadDialog* ud_)
 	createMode->setRadioGroupId(1);
 
 	if (settings->lastMode == 1)
-		addMode->setToggleState(true, true);
+		addMode->setToggleState(true, sendNotification);
 	else
-		createMode->setToggleState(true, true);
+		createMode->setToggleState(true, sendNotification);
 
 	sort->addItem(("Position"), 1);
 	sort->addItem(("Caption"), 2);
@@ -346,24 +345,24 @@ UploadComponent::UploadComponent (UploadDialog* ud_)
 	sort->addItem(("DateTime"), 5);
 	sort->addItem(("DateTimeOriginal"), 6);
 	sort->setSelectedId(1);
-	ascending->setToggleState(settings->ascending, false);
-	public_->setToggleState(settings->public_, false);
-	filenames->setToggleState(settings->filenames, false);
-	comments->setToggleState(settings->comments, false);
-	linking->setToggleState(settings->linking, false);
-	exif->setToggleState(settings->exif, false);
-	aesyshare->setToggleState(settings->aesyshare, false);
-	originals->setToggleState(settings->originals, false);
-	header->setToggleState(settings->header, false);
-	large->setToggleState(settings->large, false);
-	clean->setToggleState(settings->clean, false);
-	protect->setToggleState(settings->protect, false);
-	watermark->setToggleState(settings->watermark, false);
-	smugsearch->setToggleState(settings->smugsearch, false);
-	worldsearch->setToggleState(settings->worldsearch, false);
-	friendedit->setToggleState(settings->friendedit, false);
-	familyedit->setToggleState(settings->familyedit, false);
-	openbrowser->setToggleState(settings->openBrowser, false);
+	ascending->setToggleState(settings->ascending, dontSendNotification);
+	public_->setToggleState(settings->public_, dontSendNotification);
+	filenames->setToggleState(settings->filenames, dontSendNotification);
+	comments->setToggleState(settings->comments, dontSendNotification);
+	linking->setToggleState(settings->linking, dontSendNotification);
+	exif->setToggleState(settings->exif, dontSendNotification);
+	aesyshare->setToggleState(settings->aesyshare, dontSendNotification);
+	originals->setToggleState(settings->originals, dontSendNotification);
+	header->setToggleState(settings->header, dontSendNotification);
+	large->setToggleState(settings->large, dontSendNotification);
+	clean->setToggleState(settings->clean, dontSendNotification);
+	protect->setToggleState(settings->protect, dontSendNotification);
+	watermark->setToggleState(settings->watermark, dontSendNotification);
+	smugsearch->setToggleState(settings->smugsearch, dontSendNotification);
+	worldsearch->setToggleState(settings->worldsearch, dontSendNotification);
+	friendedit->setToggleState(settings->friendedit, dontSendNotification);
+	familyedit->setToggleState(settings->familyedit, dontSendNotification);
+	openbrowser->setToggleState(settings->openBrowser, dontSendNotification);
 
     //[/Constructor]
 }

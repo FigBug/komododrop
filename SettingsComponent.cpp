@@ -20,7 +20,6 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "stdafx.h"
 #include "Settings.h"
 //[/Headers]
 
@@ -116,8 +115,8 @@ SettingsComponent::SettingsComponent ()
 	Settings* settings = Settings::getInstance();
 	password->setText(settings->password);
 	email->setText(settings->email);
-	silentUploads->setToggleState(settings->silentUpload, false);
-	duplicate->setToggleState(settings->checkForDupes, false);
+	silentUploads->setToggleState(settings->silentUpload, dontSendNotification);
+	duplicate->setToggleState(settings->checkForDupes, dontSendNotification);
 	threads->setValue(settings->uploadThreads);
 
     //[/Constructor]

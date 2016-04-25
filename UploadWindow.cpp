@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "UploadWindow.h"
 #include "Settings.h"
 #include "UploadComponent.h"
@@ -49,10 +48,10 @@ UploadDialog::UploadDialog(SmugMug* smugMug_, String defaultAlbumName_, bool& ne
 	title(title_), 
 	albumId(albumId_), 
 	catId(catId_),
-	params(params_),
-	defaultAlbumName(defaultAlbumName_),
-	smugMug(smugMug_),
-	open(open_)
+	open(open_),
+    params(params_),
+    defaultAlbumName(defaultAlbumName_),
+    smugMug(smugMug_)
 {
 	setContentOwned(new UploadComponent(this), true);
 	centreWithSize(getWidth(), getHeight());

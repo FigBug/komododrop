@@ -1,10 +1,11 @@
-#include "stdafx.h"
+#include "../JuceLibraryCode/JuceHeader.h"
+
 #include "UploadWindow.h"
 
 class SmugmugUploaderApplication : public JUCEApplication
 {
     UploadWindow* mainWindow;
-	LookAndFeel lf;
+	LookAndFeel_V3 lf;
 
 public:
     SmugmugUploaderApplication() : mainWindow (NULL)
@@ -41,7 +42,7 @@ public:
 
     const String getApplicationVersion()
     {
-        return ("0.0.0.6");
+        return ("0.0.0.7");
     }
 	
 	void anotherInstanceStarted (const String& commandLine)

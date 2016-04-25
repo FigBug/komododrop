@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Smugmug.h"
 #include "Settings.h"
 
@@ -1042,7 +1041,7 @@ SmugID SmugMug::uploadFile(int queue, int index)
 						buf[sz] = 0;
 
 						response += buf;
-						delete buf;
+						delete[] buf;
 
 						soc.read(&ch, 1, true);
 						soc.read(&ch, 1, true);
