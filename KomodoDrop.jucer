@@ -26,7 +26,8 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="bylcTD" bigIcon="bylcTD">
+    <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="bylcTD" bigIcon="bylcTD"
+               customPList="&lt;plist&gt;&#10;&lt;dict&gt;&#10;  &lt;key&gt;NSAppTransportSecurity&lt;/key&gt;&#10;  &lt;dict&gt;&#10;     &lt;key&gt;NSAllowsArbitraryLoads&lt;/key&gt;&#10;     &lt;true/&gt;&#10;  &lt;/dict&gt;&#10;&lt;/dict&gt;&#10;&lt;/plist&gt;">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="KomodoDrop"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="KomodoDrop"/>
