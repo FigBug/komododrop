@@ -1,20 +1,18 @@
 /*
   ==============================================================================
 
-  This is an automatically generated file created by the Jucer!
-
-  Creation date:  29 Jan 2013 12:04:58pm
+  This is an automatically generated GUI class created by the Projucer!
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created with Projucer version: 5.3.2
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  The Projucer is part of the JUCE library.
+  Copyright (c) 2017 - ROLI Ltd.
 
   ==============================================================================
 */
@@ -32,270 +30,353 @@
 
 //==============================================================================
 UploadComponent::UploadComponent (UploadDialog* ud_)
-    : addMode (0),
-      createMode (0),
-      albumName (0),
-      newAlbumName (0),
-      label (0),
-      label2 (0),
-      subCategory (0),
-      category (0),
-      cancel (0),
-      ok (0),
-      label3 (0),
-      description (0),
-      label4 (0),
-      keywords (0),
-      label5 (0),
-      sort (0),
-      ascending (0),
-      public_ (0),
-      filenames (0),
-      comments (0),
-      linking (0),
-      exif (0),
-      aesyshare (0),
-      originals (0),
-      header (0),
-      large (0),
-      clean (0),
-      protect (0),
-      watermark (0),
-      smugsearch (0),
-      worldsearch (0),
-      addcat (0),
-      addsubcat (0),
-      label6 (0),
-      password (0),
-      label7 (0),
-      hint (0),
-      familyedit (0),
-      friendedit (0),
-      openbrowser (0)
 {
-    addAndMakeVisible (addMode = new ToggleButton ("addMode"));
-    addMode->setButtonText ("add to album:");
+    //[Constructor_pre] You can add your own custom stuff here..
+    //[/Constructor_pre]
+
+    addMode.reset (new ToggleButton ("addMode"));
+    addAndMakeVisible (addMode.get());
+    addMode->setButtonText (TRANS("add to album:"));
     addMode->setRadioGroupId (1);
     addMode->addListener (this);
 
-    addAndMakeVisible (createMode = new ToggleButton ("createMode"));
-    createMode->setButtonText ("create album:");
+    addMode->setBounds (16, 24, 150, 24);
+
+    createMode.reset (new ToggleButton ("createMode"));
+    addAndMakeVisible (createMode.get());
+    createMode->setButtonText (TRANS("create album:"));
     createMode->setRadioGroupId (1);
     createMode->addListener (this);
 
-    addAndMakeVisible (albumName = new ComboBox ("albumName"));
+    createMode->setBounds (16, 64, 150, 24);
+
+    albumName.reset (new ComboBox ("albumName"));
+    addAndMakeVisible (albumName.get());
     albumName->setEditableText (false);
     albumName->setJustificationType (Justification::centredLeft);
-    albumName->setTextWhenNothingSelected (String::empty);
-    albumName->setTextWhenNoChoicesAvailable ("(no choices)");
+    albumName->setTextWhenNothingSelected (String());
+    albumName->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
     albumName->addListener (this);
 
-    addAndMakeVisible (newAlbumName = new TextEditor ("newAlbumName"));
+    albumName->setBounds (168, 24, 224, 24);
+
+    newAlbumName.reset (new TextEditor ("newAlbumName"));
+    addAndMakeVisible (newAlbumName.get());
     newAlbumName->setMultiLine (false);
     newAlbumName->setReturnKeyStartsNewLine (false);
     newAlbumName->setReadOnly (false);
     newAlbumName->setScrollbarsShown (true);
     newAlbumName->setCaretVisible (true);
     newAlbumName->setPopupMenuEnabled (true);
-    newAlbumName->setText (String::empty);
+    newAlbumName->setText (String());
 
-    addAndMakeVisible (label = new Label ("new label",
-                                          "category:"));
-    label->setFont (Font (15.0000f, Font::plain));
+    newAlbumName->setBounds (168, 64, 224, 24);
+
+    label.reset (new Label ("new label",
+                            TRANS("category:")));
+    addAndMakeVisible (label.get());
+    label->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
     label->setJustificationType (Justification::centredLeft);
     label->setEditable (false, false, false);
     label->setColour (TextEditor::textColourId, Colours::black);
-    label->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    label->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    addAndMakeVisible (label2 = new Label ("new label",
-                                           "sub category:"));
-    label2->setFont (Font (15.0000f, Font::plain));
+    label->setBounds (64, 104, 88, 24);
+
+    label2.reset (new Label ("new label",
+                             TRANS("sub category:")));
+    addAndMakeVisible (label2.get());
+    label2->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
     label2->setJustificationType (Justification::centredLeft);
     label2->setEditable (false, false, false);
     label2->setColour (TextEditor::textColourId, Colours::black);
-    label2->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    label2->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    addAndMakeVisible (subCategory = new ComboBox ("subCategory"));
+    label2->setBounds (64, 144, 96, 24);
+
+    subCategory.reset (new ComboBox ("subCategory"));
+    addAndMakeVisible (subCategory.get());
     subCategory->setEditableText (false);
     subCategory->setJustificationType (Justification::centredLeft);
-    subCategory->setTextWhenNothingSelected (String::empty);
-    subCategory->setTextWhenNoChoicesAvailable ("(no choices)");
+    subCategory->setTextWhenNothingSelected (String());
+    subCategory->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
     subCategory->addListener (this);
 
-    addAndMakeVisible (category = new ComboBox ("category"));
+    subCategory->setBounds (168, 144, 176, 24);
+
+    category.reset (new ComboBox ("category"));
+    addAndMakeVisible (category.get());
     category->setEditableText (false);
     category->setJustificationType (Justification::centredLeft);
-    category->setTextWhenNothingSelected (String::empty);
-    category->setTextWhenNoChoicesAvailable ("(no choices)");
+    category->setTextWhenNothingSelected (String());
+    category->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
     category->addListener (this);
 
-    addAndMakeVisible (cancel = new TextButton ("cancel"));
+    category->setBounds (168, 104, 176, 24);
+
+    cancel.reset (new TextButton ("cancel"));
+    addAndMakeVisible (cancel.get());
     cancel->addListener (this);
 
-    addAndMakeVisible (ok = new TextButton ("ok"));
+    cancel->setBounds (504, 448, 80, 24);
+
+    ok.reset (new TextButton ("ok"));
+    addAndMakeVisible (ok.get());
     ok->addListener (this);
 
-    addAndMakeVisible (label3 = new Label ("new label",
-                                           "description:"));
-    label3->setFont (Font (15.0000f, Font::plain));
+    ok->setBounds (408, 448, 80, 24);
+
+    label3.reset (new Label ("new label",
+                             TRANS("description:")));
+    addAndMakeVisible (label3.get());
+    label3->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
     label3->setJustificationType (Justification::centredLeft);
     label3->setEditable (false, false, false);
     label3->setColour (TextEditor::textColourId, Colours::black);
-    label3->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    label3->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    addAndMakeVisible (description = new TextEditor ("description"));
+    label3->setBounds (64, 184, 150, 24);
+
+    description.reset (new TextEditor ("description"));
+    addAndMakeVisible (description.get());
     description->setMultiLine (true);
     description->setReturnKeyStartsNewLine (false);
     description->setReadOnly (false);
     description->setScrollbarsShown (true);
     description->setCaretVisible (true);
     description->setPopupMenuEnabled (true);
-    description->setText (String::empty);
+    description->setText (String());
 
-    addAndMakeVisible (label4 = new Label ("new label",
-                                           "keywords:"));
-    label4->setFont (Font (15.0000f, Font::plain));
+    description->setBounds (168, 184, 224, 88);
+
+    label4.reset (new Label ("new label",
+                             TRANS("keywords:")));
+    addAndMakeVisible (label4.get());
+    label4->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
     label4->setJustificationType (Justification::centredLeft);
     label4->setEditable (false, false, false);
     label4->setColour (TextEditor::textColourId, Colours::black);
-    label4->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    label4->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    addAndMakeVisible (keywords = new TextEditor ("keywords"));
+    label4->setBounds (64, 288, 150, 24);
+
+    keywords.reset (new TextEditor ("keywords"));
+    addAndMakeVisible (keywords.get());
     keywords->setMultiLine (false);
     keywords->setReturnKeyStartsNewLine (false);
     keywords->setReadOnly (false);
     keywords->setScrollbarsShown (true);
     keywords->setCaretVisible (true);
     keywords->setPopupMenuEnabled (true);
-    keywords->setText (String::empty);
+    keywords->setText (String());
 
-    addAndMakeVisible (label5 = new Label ("new label",
-                                           "sort:"));
-    label5->setFont (Font (15.0000f, Font::plain));
+    keywords->setBounds (168, 288, 224, 24);
+
+    label5.reset (new Label ("new label",
+                             TRANS("sort:")));
+    addAndMakeVisible (label5.get());
+    label5->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
     label5->setJustificationType (Justification::centredLeft);
     label5->setEditable (false, false, false);
     label5->setColour (TextEditor::textColourId, Colours::black);
-    label5->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    label5->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    addAndMakeVisible (sort = new ComboBox ("sort"));
+    label5->setBounds (64, 408, 150, 24);
+
+    sort.reset (new ComboBox ("sort"));
+    addAndMakeVisible (sort.get());
     sort->setEditableText (false);
     sort->setJustificationType (Justification::centredLeft);
-    sort->setTextWhenNothingSelected (String::empty);
-    sort->setTextWhenNoChoicesAvailable ("(no choices)");
+    sort->setTextWhenNothingSelected (String());
+    sort->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
     sort->addListener (this);
 
-    addAndMakeVisible (ascending = new ToggleButton ("ascending"));
+    sort->setBounds (168, 408, 128, 24);
+
+    ascending.reset (new ToggleButton ("ascending"));
+    addAndMakeVisible (ascending.get());
     ascending->addListener (this);
 
-    addAndMakeVisible (public_ = new ToggleButton ("public_"));
-    public_->setButtonText ("public");
+    ascending->setBounds (304, 408, 88, 24);
+
+    public_.reset (new ToggleButton ("public_"));
+    addAndMakeVisible (public_.get());
+    public_->setButtonText (TRANS("public"));
     public_->addListener (this);
 
-    addAndMakeVisible (filenames = new ToggleButton ("filenames"));
-    filenames->setButtonText ("show filenames");
+    public_->setBounds (416, 24, 150, 24);
+
+    filenames.reset (new ToggleButton ("filenames"));
+    addAndMakeVisible (filenames.get());
+    filenames->setButtonText (TRANS("show filenames"));
     filenames->addListener (this);
 
-    addAndMakeVisible (comments = new ToggleButton ("comments"));
-    comments->setButtonText ("allow comments");
+    filenames->setBounds (416, 48, 150, 24);
+
+    comments.reset (new ToggleButton ("comments"));
+    addAndMakeVisible (comments.get());
+    comments->setButtonText (TRANS("allow comments"));
     comments->addListener (this);
 
-    addAndMakeVisible (linking = new ToggleButton ("linking"));
-    linking->setButtonText ("allow external linking");
+    comments->setBounds (416, 72, 150, 24);
+
+    linking.reset (new ToggleButton ("linking"));
+    addAndMakeVisible (linking.get());
+    linking->setButtonText (TRANS("allow external linking"));
     linking->addListener (this);
 
-    addAndMakeVisible (exif = new ToggleButton ("exif"));
-    exif->setButtonText ("show EXIF metadata");
+    linking->setBounds (416, 96, 150, 24);
+
+    exif.reset (new ToggleButton ("exif"));
+    addAndMakeVisible (exif.get());
+    exif->setButtonText (TRANS("show EXIF metadata"));
     exif->addListener (this);
 
-    addAndMakeVisible (aesyshare = new ToggleButton ("easyshare"));
-    aesyshare->setButtonText ("allow easy share");
+    exif->setBounds (416, 120, 150, 24);
+
+    aesyshare.reset (new ToggleButton ("easyshare"));
+    addAndMakeVisible (aesyshare.get());
+    aesyshare->setButtonText (TRANS("allow easy share"));
     aesyshare->addListener (this);
 
-    addAndMakeVisible (originals = new ToggleButton ("originals"));
-    originals->setButtonText ("allow originals");
+    aesyshare->setBounds (416, 144, 150, 24);
+
+    originals.reset (new ToggleButton ("originals"));
+    addAndMakeVisible (originals.get());
+    originals->setButtonText (TRANS("allow originals"));
     originals->addListener (this);
 
-    addAndMakeVisible (header = new ToggleButton ("header"));
-    header->setButtonText ("show custom header");
+    originals->setBounds (416, 168, 150, 24);
+
+    header.reset (new ToggleButton ("header"));
+    addAndMakeVisible (header.get());
+    header->setButtonText (TRANS("show custom header"));
     header->addListener (this);
 
-    addAndMakeVisible (large = new ToggleButton ("large"));
-    large->setButtonText ("allow large");
+    header->setBounds (416, 216, 150, 24);
+
+    large.reset (new ToggleButton ("large"));
+    addAndMakeVisible (large.get());
+    large->setButtonText (TRANS("allow large"));
     large->addListener (this);
 
-    addAndMakeVisible (clean = new ToggleButton ("clean"));
-    clean->setButtonText ("use clean style");
+    large->setBounds (416, 192, 150, 24);
+
+    clean.reset (new ToggleButton ("clean"));
+    addAndMakeVisible (clean.get());
+    clean->setButtonText (TRANS("use clean style"));
     clean->addListener (this);
 
-    addAndMakeVisible (protect = new ToggleButton ("protect"));
-    protect->setButtonText ("use heavy protection");
+    clean->setBounds (416, 240, 150, 24);
+
+    protect.reset (new ToggleButton ("protect"));
+    addAndMakeVisible (protect.get());
+    protect->setButtonText (TRANS("use heavy protection"));
     protect->addListener (this);
 
-    addAndMakeVisible (watermark = new ToggleButton ("watermark"));
-    watermark->setButtonText ("apply watermarks");
+    protect->setBounds (416, 264, 150, 24);
+
+    watermark.reset (new ToggleButton ("watermark"));
+    addAndMakeVisible (watermark.get());
+    watermark->setButtonText (TRANS("apply watermarks"));
     watermark->addListener (this);
 
-    addAndMakeVisible (smugsearch = new ToggleButton ("smugsearch"));
-    smugsearch->setButtonText ("smugmug searchable");
+    watermark->setBounds (416, 288, 150, 24);
+
+    smugsearch.reset (new ToggleButton ("smugsearch"));
+    addAndMakeVisible (smugsearch.get());
+    smugsearch->setButtonText (TRANS("smugmug searchable"));
     smugsearch->addListener (this);
 
-    addAndMakeVisible (worldsearch = new ToggleButton ("worldsearch"));
-    worldsearch->setButtonText ("world searchable");
+    smugsearch->setBounds (416, 312, 150, 24);
+
+    worldsearch.reset (new ToggleButton ("worldsearch"));
+    addAndMakeVisible (worldsearch.get());
+    worldsearch->setButtonText (TRANS("world searchable"));
     worldsearch->addListener (this);
 
-    addAndMakeVisible (addcat = new TextButton ("addcat"));
-    addcat->setButtonText ("+");
+    worldsearch->setBounds (416, 336, 150, 24);
+
+    addcat.reset (new TextButton ("addcat"));
+    addAndMakeVisible (addcat.get());
+    addcat->setButtonText (TRANS("+"));
     addcat->addListener (this);
 
-    addAndMakeVisible (addsubcat = new TextButton ("addsubcat"));
-    addsubcat->setButtonText ("+");
+    addcat->setBounds (352, 104, 40, 24);
+
+    addsubcat.reset (new TextButton ("addsubcat"));
+    addAndMakeVisible (addsubcat.get());
+    addsubcat->setButtonText (TRANS("+"));
     addsubcat->addListener (this);
 
-    addAndMakeVisible (label6 = new Label ("new label",
-                                           "password:"));
-    label6->setFont (Font (15.0000f, Font::plain));
+    addsubcat->setBounds (352, 144, 40, 24);
+
+    label6.reset (new Label ("new label",
+                             TRANS("password:")));
+    addAndMakeVisible (label6.get());
+    label6->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
     label6->setJustificationType (Justification::centredLeft);
     label6->setEditable (false, false, false);
     label6->setColour (TextEditor::textColourId, Colours::black);
-    label6->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    label6->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    addAndMakeVisible (password = new TextEditor ("password"));
+    label6->setBounds (64, 328, 150, 24);
+
+    password.reset (new TextEditor ("password"));
+    addAndMakeVisible (password.get());
     password->setMultiLine (false);
     password->setReturnKeyStartsNewLine (false);
     password->setReadOnly (false);
     password->setScrollbarsShown (true);
     password->setCaretVisible (true);
     password->setPopupMenuEnabled (true);
-    password->setText (String::empty);
+    password->setText (String());
 
-    addAndMakeVisible (label7 = new Label ("new label",
-                                           "password hint:"));
-    label7->setFont (Font (15.0000f, Font::plain));
+    password->setBounds (168, 328, 224, 24);
+
+    label7.reset (new Label ("new label",
+                             TRANS("password hint:")));
+    addAndMakeVisible (label7.get());
+    label7->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
     label7->setJustificationType (Justification::centredLeft);
     label7->setEditable (false, false, false);
     label7->setColour (TextEditor::textColourId, Colours::black);
-    label7->setColour (TextEditor::backgroundColourId, Colour (0x0));
+    label7->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
-    addAndMakeVisible (hint = new TextEditor ("hint"));
+    label7->setBounds (64, 368, 150, 24);
+
+    hint.reset (new TextEditor ("hint"));
+    addAndMakeVisible (hint.get());
     hint->setMultiLine (false);
     hint->setReturnKeyStartsNewLine (false);
     hint->setReadOnly (false);
     hint->setScrollbarsShown (true);
     hint->setCaretVisible (true);
     hint->setPopupMenuEnabled (true);
-    hint->setText (String::empty);
+    hint->setText (String());
 
-    addAndMakeVisible (familyedit = new ToggleButton ("familyedit"));
-    familyedit->setButtonText ("allow family edit");
+    hint->setBounds (168, 368, 224, 24);
+
+    familyedit.reset (new ToggleButton ("familyedit"));
+    addAndMakeVisible (familyedit.get());
+    familyedit->setButtonText (TRANS("allow family edit"));
     familyedit->addListener (this);
 
-    addAndMakeVisible (friendedit = new ToggleButton ("friendedit"));
-    friendedit->setButtonText ("allow friend edit");
+    familyedit->setBounds (416, 360, 150, 24);
+
+    friendedit.reset (new ToggleButton ("friendedit"));
+    addAndMakeVisible (friendedit.get());
+    friendedit->setButtonText (TRANS("allow friend edit"));
     friendedit->addListener (this);
 
-    addAndMakeVisible (openbrowser = new ToggleButton ("openbrowser"));
-    openbrowser->setButtonText ("open in browser when finished");
+    friendedit->setBounds (416, 384, 150, 24);
+
+    openbrowser.reset (new ToggleButton ("openbrowser"));
+    addAndMakeVisible (openbrowser.get());
+    openbrowser->setButtonText (TRANS("open in browser when finished"));
     openbrowser->addListener (this);
+
+    openbrowser->setBounds (168, 440, 224, 24);
 
 
     //[UserPreSize]
@@ -372,46 +453,46 @@ UploadComponent::~UploadComponent()
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
 
-    deleteAndZero (addMode);
-    deleteAndZero (createMode);
-    deleteAndZero (albumName);
-    deleteAndZero (newAlbumName);
-    deleteAndZero (label);
-    deleteAndZero (label2);
-    deleteAndZero (subCategory);
-    deleteAndZero (category);
-    deleteAndZero (cancel);
-    deleteAndZero (ok);
-    deleteAndZero (label3);
-    deleteAndZero (description);
-    deleteAndZero (label4);
-    deleteAndZero (keywords);
-    deleteAndZero (label5);
-    deleteAndZero (sort);
-    deleteAndZero (ascending);
-    deleteAndZero (public_);
-    deleteAndZero (filenames);
-    deleteAndZero (comments);
-    deleteAndZero (linking);
-    deleteAndZero (exif);
-    deleteAndZero (aesyshare);
-    deleteAndZero (originals);
-    deleteAndZero (header);
-    deleteAndZero (large);
-    deleteAndZero (clean);
-    deleteAndZero (protect);
-    deleteAndZero (watermark);
-    deleteAndZero (smugsearch);
-    deleteAndZero (worldsearch);
-    deleteAndZero (addcat);
-    deleteAndZero (addsubcat);
-    deleteAndZero (label6);
-    deleteAndZero (password);
-    deleteAndZero (label7);
-    deleteAndZero (hint);
-    deleteAndZero (familyedit);
-    deleteAndZero (friendedit);
-    deleteAndZero (openbrowser);
+    addMode = nullptr;
+    createMode = nullptr;
+    albumName = nullptr;
+    newAlbumName = nullptr;
+    label = nullptr;
+    label2 = nullptr;
+    subCategory = nullptr;
+    category = nullptr;
+    cancel = nullptr;
+    ok = nullptr;
+    label3 = nullptr;
+    description = nullptr;
+    label4 = nullptr;
+    keywords = nullptr;
+    label5 = nullptr;
+    sort = nullptr;
+    ascending = nullptr;
+    public_ = nullptr;
+    filenames = nullptr;
+    comments = nullptr;
+    linking = nullptr;
+    exif = nullptr;
+    aesyshare = nullptr;
+    originals = nullptr;
+    header = nullptr;
+    large = nullptr;
+    clean = nullptr;
+    protect = nullptr;
+    watermark = nullptr;
+    smugsearch = nullptr;
+    worldsearch = nullptr;
+    addcat = nullptr;
+    addsubcat = nullptr;
+    label6 = nullptr;
+    password = nullptr;
+    label7 = nullptr;
+    hint = nullptr;
+    familyedit = nullptr;
+    friendedit = nullptr;
+    openbrowser = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -424,19 +505,29 @@ void UploadComponent::paint (Graphics& g)
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
 
-    g.fillAll (Colours::white);
+    {
+        float x = 5.0f, y = 21.0f, width = 392.0f, height = 450.0f;
+        Colour fillColour = Colour (0x80dadada);
+        Colour strokeColour = Colour (0x80000000);
+        //[UserPaintCustomArguments] Customize the painting arguments here..
+        //[/UserPaintCustomArguments]
+        g.setColour (fillColour);
+        g.fillRoundedRectangle (x, y, width, height, 10.000f);
+        g.setColour (strokeColour);
+        g.drawRoundedRectangle (x, y, width, height, 10.000f, 1.000f);
+    }
 
-    g.setColour (Colour (0x80dadada));
-    g.fillRoundedRectangle (5.0f, 21.0f, 392.0f, 450.0f, 10.0000f);
-
-    g.setColour (Colour (0x80000000));
-    g.drawRoundedRectangle (5.0f, 21.0f, 392.0f, 450.0f, 10.0000f, 1.0000f);
-
-    g.setColour (Colour (0x80dadada));
-    g.fillRoundedRectangle (412.0f, 16.0f, 172.0f, 407.0f, 10.0000f);
-
-    g.setColour (Colour (0x80000000));
-    g.drawRoundedRectangle (412.0f, 16.0f, 172.0f, 407.0f, 10.0000f, 1.0000f);
+    {
+        float x = 412.0f, y = 16.0f, width = 172.0f, height = 407.0f;
+        Colour fillColour = Colour (0x80dadada);
+        Colour strokeColour = Colour (0x80000000);
+        //[UserPaintCustomArguments] Customize the painting arguments here..
+        //[/UserPaintCustomArguments]
+        g.setColour (fillColour);
+        g.fillRoundedRectangle (x, y, width, height, 10.000f);
+        g.setColour (strokeColour);
+        g.drawRoundedRectangle (x, y, width, height, 10.000f, 1.000f);
+    }
 
     //[UserPaint] Add your own custom painting code here..
     //[/UserPaint]
@@ -444,46 +535,9 @@ void UploadComponent::paint (Graphics& g)
 
 void UploadComponent::resized()
 {
-    addMode->setBounds (16, 24, 150, 24);
-    createMode->setBounds (16, 64, 150, 24);
-    albumName->setBounds (168, 24, 224, 24);
-    newAlbumName->setBounds (168, 64, 224, 24);
-    label->setBounds (64, 104, 88, 24);
-    label2->setBounds (64, 144, 96, 24);
-    subCategory->setBounds (168, 144, 176, 24);
-    category->setBounds (168, 104, 176, 24);
-    cancel->setBounds (504, 448, 80, 24);
-    ok->setBounds (408, 448, 80, 24);
-    label3->setBounds (64, 184, 150, 24);
-    description->setBounds (168, 184, 224, 88);
-    label4->setBounds (64, 288, 150, 24);
-    keywords->setBounds (168, 288, 224, 24);
-    label5->setBounds (64, 408, 150, 24);
-    sort->setBounds (168, 408, 128, 24);
-    ascending->setBounds (304, 408, 88, 24);
-    public_->setBounds (416, 24, 150, 24);
-    filenames->setBounds (416, 48, 150, 24);
-    comments->setBounds (416, 72, 150, 24);
-    linking->setBounds (416, 96, 150, 24);
-    exif->setBounds (416, 120, 150, 24);
-    aesyshare->setBounds (416, 144, 150, 24);
-    originals->setBounds (416, 168, 150, 24);
-    header->setBounds (416, 216, 150, 24);
-    large->setBounds (416, 192, 150, 24);
-    clean->setBounds (416, 240, 150, 24);
-    protect->setBounds (416, 264, 150, 24);
-    watermark->setBounds (416, 288, 150, 24);
-    smugsearch->setBounds (416, 312, 150, 24);
-    worldsearch->setBounds (416, 336, 150, 24);
-    addcat->setBounds (352, 104, 40, 24);
-    addsubcat->setBounds (352, 144, 40, 24);
-    label6->setBounds (64, 328, 150, 24);
-    password->setBounds (168, 328, 224, 24);
-    label7->setBounds (64, 368, 150, 24);
-    hint->setBounds (168, 368, 224, 24);
-    familyedit->setBounds (416, 360, 150, 24);
-    friendedit->setBounds (416, 384, 150, 24);
-    openbrowser->setBounds (168, 440, 224, 24);
+    //[UserPreResize] Add your own custom resize code here..
+    //[/UserPreResize]
+
     //[UserResized] Add your own custom resize handling here..
     //[/UserResized]
 }
@@ -493,7 +547,7 @@ void UploadComponent::buttonClicked (Button* buttonThatWasClicked)
     //[UserbuttonClicked_Pre]
     //[/UserbuttonClicked_Pre]
 
-    if (buttonThatWasClicked == addMode)
+    if (buttonThatWasClicked == addMode.get())
     {
         //[UserButtonCode_addMode] -- add your button handler code here..
 		albumName->setEnabled(true);
@@ -522,7 +576,7 @@ void UploadComponent::buttonClicked (Button* buttonThatWasClicked)
 		friendedit->setEnabled(false);
         //[/UserButtonCode_addMode]
     }
-    else if (buttonThatWasClicked == createMode)
+    else if (buttonThatWasClicked == createMode.get())
     {
         //[UserButtonCode_createMode] -- add your button handler code here..
 		albumName->setEnabled(false);
@@ -551,14 +605,14 @@ void UploadComponent::buttonClicked (Button* buttonThatWasClicked)
 		friendedit->setEnabled(true);
         //[/UserButtonCode_createMode]
     }
-    else if (buttonThatWasClicked == cancel)
+    else if (buttonThatWasClicked == cancel.get())
     {
         //[UserButtonCode_cancel] -- add your button handler code here..
 		getParentComponent()->exitModalState(0);
 		delete getParentComponent();
         //[/UserButtonCode_cancel]
     }
-    else if (buttonThatWasClicked == ok)
+    else if (buttonThatWasClicked == ok.get())
     {
         //[UserButtonCode_ok] -- add your button handler code here..
 		Settings* settings = Settings::getInstance();
@@ -654,86 +708,86 @@ void UploadComponent::buttonClicked (Button* buttonThatWasClicked)
 		delete getParentComponent();
         //[/UserButtonCode_ok]
     }
-    else if (buttonThatWasClicked == ascending)
+    else if (buttonThatWasClicked == ascending.get())
     {
         //[UserButtonCode_ascending] -- add your button handler code here..
         //[/UserButtonCode_ascending]
     }
-    else if (buttonThatWasClicked == public_)
+    else if (buttonThatWasClicked == public_.get())
     {
         //[UserButtonCode_public_] -- add your button handler code here..
         //[/UserButtonCode_public_]
     }
-    else if (buttonThatWasClicked == filenames)
+    else if (buttonThatWasClicked == filenames.get())
     {
         //[UserButtonCode_filenames] -- add your button handler code here..
         //[/UserButtonCode_filenames]
     }
-    else if (buttonThatWasClicked == comments)
+    else if (buttonThatWasClicked == comments.get())
     {
         //[UserButtonCode_comments] -- add your button handler code here..
         //[/UserButtonCode_comments]
     }
-    else if (buttonThatWasClicked == linking)
+    else if (buttonThatWasClicked == linking.get())
     {
         //[UserButtonCode_linking] -- add your button handler code here..
         //[/UserButtonCode_linking]
     }
-    else if (buttonThatWasClicked == exif)
+    else if (buttonThatWasClicked == exif.get())
     {
         //[UserButtonCode_exif] -- add your button handler code here..
         //[/UserButtonCode_exif]
     }
-    else if (buttonThatWasClicked == aesyshare)
+    else if (buttonThatWasClicked == aesyshare.get())
     {
         //[UserButtonCode_aesyshare] -- add your button handler code here..
         //[/UserButtonCode_aesyshare]
     }
-    else if (buttonThatWasClicked == originals)
+    else if (buttonThatWasClicked == originals.get())
     {
         //[UserButtonCode_originals] -- add your button handler code here..
         //[/UserButtonCode_originals]
     }
-    else if (buttonThatWasClicked == header)
+    else if (buttonThatWasClicked == header.get())
     {
         //[UserButtonCode_header] -- add your button handler code here..
         //[/UserButtonCode_header]
     }
-    else if (buttonThatWasClicked == large)
+    else if (buttonThatWasClicked == large.get())
     {
         //[UserButtonCode_large] -- add your button handler code here..
         //[/UserButtonCode_large]
     }
-    else if (buttonThatWasClicked == clean)
+    else if (buttonThatWasClicked == clean.get())
     {
         //[UserButtonCode_clean] -- add your button handler code here..
         //[/UserButtonCode_clean]
     }
-    else if (buttonThatWasClicked == protect)
+    else if (buttonThatWasClicked == protect.get())
     {
         //[UserButtonCode_protect] -- add your button handler code here..
         //[/UserButtonCode_protect]
     }
-    else if (buttonThatWasClicked == watermark)
+    else if (buttonThatWasClicked == watermark.get())
     {
         //[UserButtonCode_watermark] -- add your button handler code here..
         //[/UserButtonCode_watermark]
     }
-    else if (buttonThatWasClicked == smugsearch)
+    else if (buttonThatWasClicked == smugsearch.get())
     {
         //[UserButtonCode_smugsearch] -- add your button handler code here..
         //[/UserButtonCode_smugsearch]
     }
-    else if (buttonThatWasClicked == worldsearch)
+    else if (buttonThatWasClicked == worldsearch.get())
     {
         //[UserButtonCode_worldsearch] -- add your button handler code here..
         //[/UserButtonCode_worldsearch]
     }
-    else if (buttonThatWasClicked == addcat)
+    else if (buttonThatWasClicked == addcat.get())
     {
         //[UserButtonCode_addcat] -- add your button handler code here..
 		AlertWindow aw(("Komodo Drop"), ("Create category:"), AlertWindow::InfoIcon);
-		aw.addTextEditor(("name"), String::empty, ("category name:"));
+		aw.addTextEditor(("name"), "", ("category name:"));
 		aw.addButton(("ok"), 1);
 		aw.addButton(("cancel"), 2);
 
@@ -748,11 +802,11 @@ void UploadComponent::buttonClicked (Button* buttonThatWasClicked)
 		}
         //[/UserButtonCode_addcat]
     }
-    else if (buttonThatWasClicked == addsubcat)
+    else if (buttonThatWasClicked == addsubcat.get())
     {
         //[UserButtonCode_addsubcat] -- add your button handler code here..
 		AlertWindow aw(("Komodo Drop"), ("Create sub category:"), AlertWindow::InfoIcon);
-		aw.addTextEditor(("name"), String::empty, ("sub category name:"));
+		aw.addTextEditor(("name"), "", ("sub category name:"));
 		aw.addButton(("ok"), 1);
 		aw.addButton(("cancel"), 2);
 
@@ -767,17 +821,17 @@ void UploadComponent::buttonClicked (Button* buttonThatWasClicked)
 		}
         //[/UserButtonCode_addsubcat]
     }
-    else if (buttonThatWasClicked == familyedit)
+    else if (buttonThatWasClicked == familyedit.get())
     {
         //[UserButtonCode_familyedit] -- add your button handler code here..
         //[/UserButtonCode_familyedit]
     }
-    else if (buttonThatWasClicked == friendedit)
+    else if (buttonThatWasClicked == friendedit.get())
     {
         //[UserButtonCode_friendedit] -- add your button handler code here..
         //[/UserButtonCode_friendedit]
     }
-    else if (buttonThatWasClicked == openbrowser)
+    else if (buttonThatWasClicked == openbrowser.get())
     {
         //[UserButtonCode_openbrowser] -- add your button handler code here..
         //[/UserButtonCode_openbrowser]
@@ -792,17 +846,17 @@ void UploadComponent::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
     //[UsercomboBoxChanged_Pre]
     //[/UsercomboBoxChanged_Pre]
 
-    if (comboBoxThatHasChanged == albumName)
+    if (comboBoxThatHasChanged == albumName.get())
     {
         //[UserComboBoxCode_albumName] -- add your combo box handling code here..
         //[/UserComboBoxCode_albumName]
     }
-    else if (comboBoxThatHasChanged == subCategory)
+    else if (comboBoxThatHasChanged == subCategory.get())
     {
         //[UserComboBoxCode_subCategory] -- add your combo box handling code here..
         //[/UserComboBoxCode_subCategory]
     }
-    else if (comboBoxThatHasChanged == category)
+    else if (comboBoxThatHasChanged == category.get())
     {
         //[UserComboBoxCode_category] -- add your combo box handling code here..
 		subCategory->clear();
@@ -817,7 +871,7 @@ void UploadComponent::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
 
         //[/UserComboBoxCode_category]
     }
-    else if (comboBoxThatHasChanged == sort)
+    else if (comboBoxThatHasChanged == sort.get())
     {
         //[UserComboBoxCode_sort] -- add your combo box handling code here..
         //[/UserComboBoxCode_sort]
@@ -835,22 +889,22 @@ void UploadComponent::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
 
 //==============================================================================
 #if 0
-/*  -- Jucer information section --
+/*  -- Projucer information section --
 
-    This is where the Jucer puts all of its metadata, so don't change anything in here!
+    This is where the Projucer stores the metadata that describe this GUI layout, so
+    make changes in here at your peril!
 
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="UploadComponent" componentName=""
                  parentClasses="public Component" constructorParams="UploadDialog* ud_"
                  variableInitialisers="" snapPixels="8" snapActive="1" snapShown="1"
-                 overlayOpacity="0.330000013" fixedSize="0" initialWidth="592"
-                 initialHeight="478">
-  <BACKGROUND backgroundColour="ffffffff">
-    <ROUNDRECT pos="5 21 392 450" cornerSize="10" fill="solid: 80dadada" hasStroke="1"
-               stroke="1, mitered, butt" strokeColour="solid: 80000000"/>
-    <ROUNDRECT pos="412 16 172 407" cornerSize="10" fill="solid: 80dadada" hasStroke="1"
-               stroke="1, mitered, butt" strokeColour="solid: 80000000"/>
+                 overlayOpacity="0.330" fixedSize="0" initialWidth="592" initialHeight="478">
+  <BACKGROUND backgroundColour="808080">
+    <ROUNDRECT pos="5 21 392 450" cornerSize="10.00000000000000000000" fill="solid: 80dadada"
+               hasStroke="1" stroke="1, mitered, butt" strokeColour="solid: 80000000"/>
+    <ROUNDRECT pos="412 16 172 407" cornerSize="10.00000000000000000000" fill="solid: 80dadada"
+               hasStroke="1" stroke="1, mitered, butt" strokeColour="solid: 80000000"/>
   </BACKGROUND>
   <TOGGLEBUTTON name="addMode" id="d4faa3f1b68ea451" memberName="addMode" virtualName=""
                 explicitFocusOrder="0" pos="16 24 150 24" buttonText="add to album:"
@@ -868,13 +922,14 @@ BEGIN_JUCER_METADATA
   <LABEL name="new label" id="4b579a12b85fac9b" memberName="label" virtualName=""
          explicitFocusOrder="0" pos="64 104 88 24" edTextCol="ff000000"
          edBkgCol="0" labelText="category:" editableSingleClick="0" editableDoubleClick="0"
-         focusDiscardsChanges="0" fontname="Default font" fontsize="15"
-         bold="0" italic="0" justification="33"/>
+         focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
+         kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <LABEL name="new label" id="ef5a9f17c7ff3c93" memberName="label2" virtualName=""
          explicitFocusOrder="0" pos="64 144 96 24" edTextCol="ff000000"
          edBkgCol="0" labelText="sub category:" editableSingleClick="0"
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
-         fontsize="15" bold="0" italic="0" justification="33"/>
+         fontsize="15.00000000000000000000" kerning="0.00000000000000000000"
+         bold="0" italic="0" justification="33"/>
   <COMBOBOX name="subCategory" id="c17eb46e944bab75" memberName="subCategory"
             virtualName="" explicitFocusOrder="0" pos="168 144 176 24" editable="0"
             layout="33" items="" textWhenNonSelected="" textWhenNoItems="(no choices)"/>
@@ -891,7 +946,8 @@ BEGIN_JUCER_METADATA
          explicitFocusOrder="0" pos="64 184 150 24" edTextCol="ff000000"
          edBkgCol="0" labelText="description:" editableSingleClick="0"
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
-         fontsize="15" bold="0" italic="0" justification="33"/>
+         fontsize="15.00000000000000000000" kerning="0.00000000000000000000"
+         bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="description" id="5689d9400c0ea41b" memberName="description"
               virtualName="" explicitFocusOrder="0" pos="168 184 224 88" initialText=""
               multiline="1" retKeyStartsLine="0" readonly="0" scrollbars="1"
@@ -899,16 +955,16 @@ BEGIN_JUCER_METADATA
   <LABEL name="new label" id="a61c62975c991cca" memberName="label4" virtualName=""
          explicitFocusOrder="0" pos="64 288 150 24" edTextCol="ff000000"
          edBkgCol="0" labelText="keywords:" editableSingleClick="0" editableDoubleClick="0"
-         focusDiscardsChanges="0" fontname="Default font" fontsize="15"
-         bold="0" italic="0" justification="33"/>
+         focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
+         kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="keywords" id="cbd6469352ebe77c" memberName="keywords" virtualName=""
               explicitFocusOrder="0" pos="168 288 224 24" initialText="" multiline="0"
               retKeyStartsLine="0" readonly="0" scrollbars="1" caret="1" popupmenu="1"/>
   <LABEL name="new label" id="b5558a4d2c805afc" memberName="label5" virtualName=""
          explicitFocusOrder="0" pos="64 408 150 24" edTextCol="ff000000"
          edBkgCol="0" labelText="sort:" editableSingleClick="0" editableDoubleClick="0"
-         focusDiscardsChanges="0" fontname="Default font" fontsize="15"
-         bold="0" italic="0" justification="33"/>
+         focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
+         kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <COMBOBOX name="sort" id="c43f84b9b6f170ca" memberName="sort" virtualName=""
             explicitFocusOrder="0" pos="168 408 128 24" editable="0" layout="33"
             items="" textWhenNonSelected="" textWhenNoItems="(no choices)"/>
@@ -966,8 +1022,8 @@ BEGIN_JUCER_METADATA
   <LABEL name="new label" id="b63e1554e0c1ddcd" memberName="label6" virtualName=""
          explicitFocusOrder="0" pos="64 328 150 24" edTextCol="ff000000"
          edBkgCol="0" labelText="password:" editableSingleClick="0" editableDoubleClick="0"
-         focusDiscardsChanges="0" fontname="Default font" fontsize="15"
-         bold="0" italic="0" justification="33"/>
+         focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
+         kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="password" id="63e101965dfea7d" memberName="password" virtualName=""
               explicitFocusOrder="0" pos="168 328 224 24" initialText="" multiline="0"
               retKeyStartsLine="0" readonly="0" scrollbars="1" caret="1" popupmenu="1"/>
@@ -975,7 +1031,8 @@ BEGIN_JUCER_METADATA
          explicitFocusOrder="0" pos="64 368 150 24" edTextCol="ff000000"
          edBkgCol="0" labelText="password hint:" editableSingleClick="0"
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
-         fontsize="15" bold="0" italic="0" justification="33"/>
+         fontsize="15.00000000000000000000" kerning="0.00000000000000000000"
+         bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="hint" id="be1ad1ab974eef02" memberName="hint" virtualName=""
               explicitFocusOrder="0" pos="168 368 224 24" initialText="" multiline="0"
               retKeyStartsLine="0" readonly="0" scrollbars="1" caret="1" popupmenu="1"/>
@@ -993,7 +1050,6 @@ BEGIN_JUCER_METADATA
 END_JUCER_METADATA
 */
 #endif
-
 
 
 //[EndFile] You can add extra defines here...

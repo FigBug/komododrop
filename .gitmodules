@@ -1,0 +1,3 @@
+[submodule "modules/JUCE"]
+	path = modules/JUCE
+	url = git@github.com:WeAreROLI/JUCE.git

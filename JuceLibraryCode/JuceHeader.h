@@ -10,8 +10,7 @@
 
 */
 
-#ifndef __APPHEADERFILE_BFPNWS__
-#define __APPHEADERFILE_BFPNWS__
+#pragma once
 
 #include "AppConfig.h"
 
@@ -45,5 +44,3 @@ namespace ProjectInfo
     const int          versionNumber  = 0x7;
 }
 #endif
-
-#endif   // __APPHEADERFILE_BFPNWS__

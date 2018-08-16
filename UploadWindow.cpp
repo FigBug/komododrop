@@ -43,7 +43,7 @@ private:
 #endif
 
 UploadDialog::UploadDialog(SmugMug* smugMug_, String defaultAlbumName_, bool& newAlbum_, String& title_, SmugID& albumId_, int& catId_, StringPairArray& params_, bool& open_)
-  : DialogWindow("Komodo Drop", Colours::white, true),
+  : DialogWindow("Komodo Drop", LookAndFeel::getDefaultLookAndFeel().findColour(AlertWindow::backgroundColourId), true),
     newAlbum(newAlbum_), 
 	title(title_), 
 	albumId(albumId_), 
@@ -278,7 +278,7 @@ void UploadWindow::handleCommand(int res)
 		smugMug.getAlbumList(albums);
 		if (albums.size() > 0)
 		{
-			ComboBox* album = new ComboBox(String::empty);
+			ComboBox* album = new ComboBox("");
 			album->setSize(300, 26);
 			album->setVisible(true);
 
@@ -307,7 +307,7 @@ void UploadWindow::handleCommand(int res)
 		smugMug.getCategoryList(categories);
 		if (categories.size())
 		{
-			ComboBox* cats = new ComboBox(String::empty);
+			ComboBox* cats = new ComboBox("");
 			cats->setSize(300, 26);
 			cats->setVisible(true);
 
@@ -340,7 +340,7 @@ void UploadWindow::handleCommand(int res)
 
 		if (subCategories.size())
 		{
-			ComboBox* cats = new ComboBox(String::empty);
+			ComboBox* cats = new ComboBox("");
 			cats->setSize(300, 26);
 			cats->setVisible(true);
 
@@ -374,7 +374,7 @@ void UploadWindow::handleCommand(int res)
 			smugMug.login(Settings::getInstance()->email, Settings::getInstance()->password);
 
 			AlertWindow aw("Komodo Drop", "Create category:", AlertWindow::InfoIcon);
-			aw.addTextEditor("name", String::empty, "category name:");
+			aw.addTextEditor("name", "", "category name:");
 			aw.addButton("ok", 1);
 			aw.addButton("cancel", 2);
 
@@ -393,7 +393,7 @@ void UploadWindow::handleCommand(int res)
 
 		if (categories.size())
 		{
-			ComboBox* cats = new ComboBox(String::empty);
+			ComboBox* cats = new ComboBox("");
 			cats->setSize(300, 26);
 			cats->setVisible(true);
 
@@ -403,7 +403,7 @@ void UploadWindow::handleCommand(int res)
 			
 			AlertWindow aw("Komodo Drop", "Create sub category:", AlertWindow::InfoIcon);
 			aw.addCustomComponent(cats);
-			aw.addTextEditor("name", String::empty, "sub category name:");
+			aw.addTextEditor("name", "", "sub category name:");
 			aw.addButton("ok", 1);
 			aw.addButton("cancel", 2);
 
@@ -509,7 +509,7 @@ void UploadWindow::handleCommand(int res)
 		smugMug.getAlbumList(albums);
 		if (albums.size() > 0)
 		{
-			ComboBox* album = new ComboBox(String::empty);
+			ComboBox* album = new ComboBox("");
 			album->setSize(300, 26);
 			album->setVisible(true);
 
@@ -551,7 +551,7 @@ bool UploadWindow::isInterestedInFileDrag(const StringArray& files)
 void UploadWindow::filesDropped(const StringArray& filenames, int mouseX, int mouseY)
 {
 	StringArray extensions;
-	extensions.addTokens(".jpg;.jpeg;.jpe;.png;.tif;.tiff;.png;.gif;.mpg;.mpeg;.mpe;.mov;.qt;.avi;.wmv", ";", String::empty);
+	extensions.addTokens(".jpg;.jpeg;.jpe;.png;.tif;.tiff;.png;.gif;.mpg;.mpeg;.mpe;.mov;.qt;.avi;.wmv", ";", "");
 
 	UploadRequest* ur = new UploadRequest();
 	for (int i = 0; i < filenames.size(); i++)

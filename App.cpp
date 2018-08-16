@@ -5,7 +5,7 @@
 class SmugmugUploaderApplication : public JUCEApplication
 {
     UploadWindow* mainWindow;
-	LookAndFeel_V3 lf;
+	LookAndFeel_V4 lf;
 
 public:
     SmugmugUploaderApplication() : mainWindow (NULL)

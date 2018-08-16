@@ -1,8 +1,8 @@
 #include "Smugmug.h"
 #include "Settings.h"
 
-#define BASE_URL   "http://api.smugmug.com/services/api/rest/1.2.2/"
-#define UPLOAD_URL "http://upload.smugmug.com/services/api/rest/1.2.2/"
+#define BASE_URL   "https://api.smugmug.com/services/api/rest/1.3.0/"
+#define UPLOAD_URL "http://upload.smugmug.com/services/api/rest/1.3.0/"
 #define APIKEY     "gaEJ900gzH9ucFiUxBYd9sRfj6T3iTiM"
 
 #define LOGOUT_TIMER (10 * 60 * 1000)
@@ -102,7 +102,7 @@ public:
 class QueueDialog : public DialogWindow, public Timer
 {
 public:
-	QueueDialog(SmugMug* smugMug_) : DialogWindow(("Komodo Drop"), Colours::white, true), smugMug(smugMug_)
+	QueueDialog(SmugMug* smugMug_) : DialogWindow(("Komodo Drop"), LookAndFeel::getDefaultLookAndFeel().findColour(AlertWindow::backgroundColourId), true), smugMug(smugMug_)
 	{
 		centreWithSize(600, 450);
 		tree = new TreeView();
@@ -143,10 +143,10 @@ class LogDialog : public DialogWindow,
 				  public ChangeListener
 {
 public:
-	LogDialog(SmugMug* smugMug_) : DialogWindow(("Komodo Drop"), Colours::white, true), smugMug(smugMug_)
+	LogDialog(SmugMug* smugMug_) : DialogWindow(("Komodo Drop"), LookAndFeel::getDefaultLookAndFeel().findColour(AlertWindow::backgroundColourId), true), smugMug(smugMug_)
 	{
 		centreWithSize(600, 450);
-		list = new ListBox(String::empty, this);
+		list = new ListBox("", this);
 		list->setSize(600, 450);
 		setContentOwned(list, true);
 		list->updateContent();
@@ -386,7 +386,7 @@ SmugMug::~SmugMug()
 
 void SmugMug::login(const String& username, const String& password)
 {
-	sessionId = String::empty;
+	sessionId = "";
 
 	StringPairArray params;
 	params.set(("EmailAddress"), username);
@@ -435,7 +435,7 @@ void SmugMug::logout()
 	if (n)
 		delete n;
 
-	sessionId = String::empty;
+	sessionId = "";
 }
 
 bool SmugMug::getNumberOfViews(int month, int year, OwnedArray<Views>& albums, OwnedArray<Views>& images)
@@ -455,7 +455,7 @@ bool SmugMug::getNumberOfViews(int month, int year, OwnedArray<Views>& albums, O
 			{
 				Views* v = new Views();
 				v->id    = alb->getIntAttribute(("id"));
-				v->views = alb->getIntAttribute(("Tiny")) + alb->getIntAttribute(("Small")) + alb->getIntAttribute(("Medium")) + alb->getIntAttribute(("Large")) + roundDoubleToInt(alb->getDoubleAttribute(("Original")));
+				v->views = alb->getIntAttribute(("Tiny")) + alb->getIntAttribute(("Small")) + alb->getIntAttribute(("Medium")) + alb->getIntAttribute(("Large")) + roundToInt(alb->getDoubleAttribute(("Original")));
 
 				albums.add(v);
 
@@ -464,7 +464,7 @@ bool SmugMug::getNumberOfViews(int month, int year, OwnedArray<Views>& albums, O
 				{
 					Views* v = new Views();
 					v->id    = img->getIntAttribute(("id"));
-					v->views = img->getIntAttribute(("Tiny")) + img->getIntAttribute(("Small")) + img->getIntAttribute(("Medium")) + img->getIntAttribute(("Large")) + roundDoubleToInt(img->getDoubleAttribute(("Original")));
+					v->views = img->getIntAttribute(("Tiny")) + img->getIntAttribute(("Small")) + img->getIntAttribute(("Medium")) + img->getIntAttribute(("Large")) + roundToInt(img->getDoubleAttribute(("Original")));
 
 					img = img->getNextElementWithTagName(("Image"));
 				}
@@ -685,7 +685,7 @@ bool SmugMug::getAlbumList(OwnedArray<Album>& albums)
 				}
 				else
 				{
-					album->category   = String::empty;
+					album->category   = "";
 					album->categoryId = -1;
 				}
 
@@ -697,7 +697,7 @@ bool SmugMug::getAlbumList(OwnedArray<Album>& albums)
 				}
 				else
 				{
-					album->subCategory   = String::empty;
+					album->subCategory   = "";
 					album->subCategoryId = -1;
 				}
 
@@ -860,7 +860,7 @@ XmlElement* SmugMug::smugMugRequest(const String& method, const StringPairArray&
 #ifdef JUCE_DEBUG
 	Logger::outputDebugString(url.toString(true));
 	if (x)
-		Logger::outputDebugString(x->createDocument(String::empty, true));
+		Logger::outputDebugString(x->createDocument("", true));
 #endif
 	if (x && x->getStringAttribute(("stat")) == ("fail"))
 	{

@@ -1,26 +1,23 @@
 /*
   ==============================================================================
 
-  This is an automatically generated file created by the Jucer!
-
-  Creation date:  29 Jan 2013 11:56:27am
+  This is an automatically generated GUI class created by the Projucer!
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created with Projucer version: 5.3.2
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  The Projucer is part of the JUCE library.
+  Copyright (c) 2017 - ROLI Ltd.
 
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_SETTINGSCOMPONENT_SETTINGSCOMPONENT_D40CF292__
-#define __JUCER_HEADER_SETTINGSCOMPONENT_SETTINGSCOMPONENT_D40CF292__
+#pragma once
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -37,8 +34,8 @@
                                                                     //[/Comments]
 */
 class SettingsComponent  : public Component,
-                           public ButtonListener,
-                           public SliderListener
+                           public Button::Listener,
+                           public Slider::Listener
 {
 public:
     //==============================================================================
@@ -49,10 +46,10 @@ public:
     //[UserMethods]     -- You can add your own custom methods in this section.
     //[/UserMethods]
 
-    void paint (Graphics& g);
-    void resized();
-    void buttonClicked (Button* buttonThatWasClicked);
-    void sliderValueChanged (Slider* sliderThatWasMoved);
+    void paint (Graphics& g) override;
+    void resized() override;
+    void buttonClicked (Button* buttonThatWasClicked) override;
+    void sliderValueChanged (Slider* sliderThatWasMoved) override;
 
 
 
@@ -61,16 +58,16 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    Label* label2;
-    Label* label1;
-    TextEditor* email;
-    TextEditor* password;
-    TextButton* cancel;
-    TextButton* ok;
-    ToggleButton* silentUploads;
-    ToggleButton* duplicate;
-    Slider* threads;
-    Label* label;
+    std::unique_ptr<Label> label2;
+    std::unique_ptr<Label> label1;
+    std::unique_ptr<TextEditor> email;
+    std::unique_ptr<TextEditor> password;
+    std::unique_ptr<TextButton> cancel;
+    std::unique_ptr<TextButton> ok;
+    std::unique_ptr<ToggleButton> silentUploads;
+    std::unique_ptr<ToggleButton> duplicate;
+    std::unique_ptr<Slider> threads;
+    std::unique_ptr<Label> label;
 
 
     //==============================================================================
@@ -79,5 +76,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-
-#endif   // __JUCER_HEADER_SETTINGSCOMPONENT_SETTINGSCOMPONENT_D40CF292__

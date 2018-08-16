@@ -6,7 +6,7 @@ juce_ImplementSingleton(Settings);
 class SettingsDialog : public DialogWindow
 {
 public:
-	SettingsDialog() : DialogWindow("Komodo Drop", Colours::white, true)
+    SettingsDialog() : DialogWindow("Komodo Drop", LookAndFeel::getDefaultLookAndFeel().findColour(AlertWindow::backgroundColourId), true)
 	{	
 		setContentOwned(new SettingsComponent(), true);
 		centreWithSize(getWidth(), getHeight());
