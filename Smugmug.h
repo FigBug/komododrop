@@ -228,7 +228,7 @@ private:
 	friend class LogDialog;
 
 	SmugID uploadFile(int queue, int index);
-	XmlElement* smugMugRequest(const String& method, const StringPairArray& params, bool upload = false);
+    std::unique_ptr<XmlElement> smugMugRequest(const String& method, const StringPairArray& params, bool upload = false);
 	void addLogEntry(const String& message);
 	String sessionId;
 	String accountType;

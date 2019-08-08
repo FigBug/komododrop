@@ -392,7 +392,7 @@ void SmugMug::login(const String& username, const String& password)
 	params.set(("EmailAddress"), username);
 	params.set(("Password"), password);
 
-	XmlElement* n = smugMugRequest(("smugmug.login.withPassword"), params);
+	auto n = smugMugRequest(("smugmug.login.withPassword"), params);
 	
 	if (n)
 	{
@@ -407,7 +407,6 @@ void SmugMug::login(const String& username, const String& password)
 				addLogEntry(("Info: logged in session: ") + sessionId);
 			}
 		}
-		delete n;
 	}
 }
 
@@ -429,11 +428,9 @@ bool SmugMug::isLoggedIn()
 void SmugMug::logout()
 {
 	StringPairArray params;
-	XmlElement* n = smugMugRequest(("smugmug.logout"), params);
+	auto n = smugMugRequest(("smugmug.logout"), params);
 
 	addLogEntry(("Info: logged out session ") + sessionId);
-	if (n)
-		delete n;
 
 	sessionId = "";
 }
@@ -443,7 +440,7 @@ bool SmugMug::getNumberOfViews(int month, int year, OwnedArray<Views>& albums, O
 	StringPairArray params;
 	params.set(("Month"), String(month));
 	params.set(("Year"), String(year));
-	XmlElement* n = smugMugRequest(("smugmug.users.getTransferStats"), params);
+	auto n = smugMugRequest(("smugmug.users.getTransferStats"), params);
 
 	if (n)
 	{
@@ -472,7 +469,6 @@ bool SmugMug::getNumberOfViews(int month, int year, OwnedArray<Views>& albums, O
 				alb = alb->getNextElementWithTagName(("Album"));
 			}
 		}
-		delete n;
 		return true;
 	}
 	return false;
@@ -484,7 +480,7 @@ bool SmugMug::getImageUrls(SmugID id, ImageUrls& urls)
 	params.set(("ImageID"), String(id.id));
 	params.set(("ImageKey"), id.key);
 	params.set(("Password"), "");
-	XmlElement* n = smugMugRequest(("smugmug.images.getURLs"), params);
+	auto n = smugMugRequest(("smugmug.images.getURLs"), params);
 
 	if (n)
 	{
@@ -501,7 +497,6 @@ bool SmugMug::getImageUrls(SmugID id, ImageUrls& urls)
 			urls.albumURL    = img->getStringAttribute(("AlbumURL"));
 		}
 	
-		delete n;
 		return true;
 	}
 	return false;
@@ -513,7 +508,7 @@ bool SmugMug::getImages(OwnedArray<ImageItem>& images, SmugID albumId)
 	params.set(("AlbumID"), String(albumId.id));
 	params.set(("AlbumKey"), albumId.key);
 	params.set(("Heavy"), ("1"));
-	XmlElement* n = smugMugRequest(("smugmug.images.get"), params);
+	auto n = smugMugRequest(("smugmug.images.get"), params);
 
 	if (n)
 	{
@@ -557,7 +552,6 @@ bool SmugMug::getImages(OwnedArray<ImageItem>& images, SmugID albumId)
 				}
 			}
 		}
-		delete n;
 		return images.size() > 0;
 	}
 	return false;
@@ -567,16 +561,12 @@ bool SmugMug::deleteCategory(int category)
 {
 	StringPairArray params;
 	params.set(("CategoryID"), String(category));
-	XmlElement* n = smugMugRequest(("smugmug.categories.delete"), params);
+	auto n = smugMugRequest(("smugmug.categories.delete"), params);
 
 	if (n)
 	{	
 		if (n->getTagName() == ("rsp") && n->getStringAttribute(("stat")) == ("ok"))
-		{
-			delete n;
 			return true;
-		}
-		delete n;
 	}
 	return false;
 }
@@ -609,17 +599,12 @@ bool SmugMug::deleteSubCategory(int subCategory)
 {
 	StringPairArray params;
 	params.set(("SubCategoryID"), String(subCategory));
-	XmlElement* n = smugMugRequest(("smugmug.subcategories.delete"), params);
+	auto n = smugMugRequest(("smugmug.subcategories.delete"), params);
 
 	if (n)
-	{	
 		if (n->getTagName() == ("rsp") && n->getStringAttribute(("stat")) == ("ok"))
-		{
-			delete n;
 			return true;
-		}
-		delete n;
-	}
+    
 	return false;
 }
 
@@ -627,16 +612,12 @@ bool SmugMug::deleteAlbum(SmugID album)
 {
 	StringPairArray params;
 	params.set(("AlbumID"), String(album.id));
-	XmlElement* n = smugMugRequest(("smugmug.albums.delete"), params);
+	auto n = smugMugRequest(("smugmug.albums.delete"), params);
 
 	if (n)
 	{	
 		if (n->getTagName() == ("rsp") && n->getStringAttribute(("stat")) == ("ok"))
-		{
-			delete n;
 			return true;
-		}
-		delete n;
 	}
 	return false;
 }
@@ -645,16 +626,12 @@ bool SmugMug::deleteImage(SmugID image)
 {
 	StringPairArray params;
 	params.set(("ImageID"), String(image.id));
-	XmlElement* n = smugMugRequest(("smugmug.images.delete"), params);
+	auto n = smugMugRequest(("smugmug.images.delete"), params);
 
 	if (n)
 	{	
 		if (n->getTagName() == ("rsp") && n->getStringAttribute(("stat")) == ("ok"))
-		{
-			delete n;
 			return true;
-		}
-		delete n;
 	}
 	return false;
 }
@@ -662,7 +639,7 @@ bool SmugMug::deleteImage(SmugID image)
 bool SmugMug::getAlbumList(OwnedArray<Album>& albums)
 {
 	StringPairArray params;
-	XmlElement* n = smugMugRequest(("smugmug.albums.get"), params);
+	auto n = smugMugRequest(("smugmug.albums.get"), params);
 
 	if (n)
 	{
@@ -706,7 +683,6 @@ bool SmugMug::getAlbumList(OwnedArray<Album>& albums)
 				alb = alb->getNextElementWithTagName(("Album"));
 			}
 		}
-		delete n;
 		return true;
 	}
 	return false;
@@ -715,7 +691,7 @@ bool SmugMug::getAlbumList(OwnedArray<Album>& albums)
 bool SmugMug::getCategoryList(OwnedArray<Category>& categories)
 {
 	StringPairArray params;
-	XmlElement* n = smugMugRequest(("smugmug.categories.get"), params);
+	auto n = smugMugRequest(("smugmug.categories.get"), params);
 
 	if (n)
 	{
@@ -733,7 +709,6 @@ bool SmugMug::getCategoryList(OwnedArray<Category>& categories)
 				cat = cat->getNextElementWithTagName(("Category"));
 			}
 		}
-		delete n;
 		return true;
 	}
 	return false;
@@ -742,7 +717,7 @@ bool SmugMug::getCategoryList(OwnedArray<Category>& categories)
 bool SmugMug::getSubCategoryList(OwnedArray<SubCategory>& subCategories)
 {
 	StringPairArray params;
-	XmlElement* n = smugMugRequest(("smugmug.subcategories.getAll"), params);
+	auto n = smugMugRequest(("smugmug.subcategories.getAll"), params);
 
 	if (n)
 	{
@@ -765,7 +740,6 @@ bool SmugMug::getSubCategoryList(OwnedArray<SubCategory>& subCategories)
 				subCat = subCat->getNextElementWithTagName(("SubCategory"));
 			}
 		}
-		delete n;
 		return true;
 	}
 	return false;
@@ -777,15 +751,13 @@ int SmugMug::createCategory(const String& title)
 
 	StringPairArray params;
 	params.set(("Name"), title);
-	XmlElement* n = smugMugRequest(("smugmug.categories.create"), params);
+	auto n = smugMugRequest(("smugmug.categories.create"), params);
 
 	if (n)
 	{
 		XmlElement* a = n->getChildByName(("Category"));
 		if (a) 
 			catId = a->getIntAttribute(("id"), -1);
-
-		delete n;
 	}
 	return catId;
 }
@@ -797,15 +769,13 @@ int SmugMug::createSubCategory(const int categoryId, const String& title)
 	StringPairArray params;
 	params.set(("CategoryID"), String(categoryId));
 	params.set(("Name"), title);
-	XmlElement* n = smugMugRequest(("smugmug.subcategories.create"), params);
+	auto n = smugMugRequest(("smugmug.subcategories.create"), params);
 
 	if (n)
 	{
 		XmlElement* a = n->getChildByName(("SubCategory"));
 		if (a) 
 			subCatId = a->getIntAttribute(("id"), -1);
-
-		delete n;
 	}
 	return subCatId;
 }
@@ -818,7 +788,7 @@ SmugID SmugMug::createAlbum(const String& title, const int categoryId, const Str
 	StringPairArray params(albumFlags);
 	params.set(("Title"), title);
 	params.set(("CategoryID"), String(categoryId));
-	XmlElement* n = smugMugRequest(("smugmug.albums.create"), params);
+	auto n = smugMugRequest(("smugmug.albums.create"), params);
 
 	if (n)
 	{
@@ -831,13 +801,11 @@ SmugID SmugMug::createAlbum(const String& title, const int categoryId, const Str
 
 		if (newAlbum.id != -1)
 			addLogEntry(("Info: album created: ") + title);
-
-		delete n;
 	}
 	return newAlbum;
 }
 
-XmlElement* SmugMug::smugMugRequest(const String& method, const StringPairArray& params_, bool upload)
+std::unique_ptr<XmlElement> SmugMug::smugMugRequest(const String& method, const StringPairArray& params_, bool upload)
 {
 	StringPairArray params(params_);
 	params.set(("method"), method);
@@ -856,11 +824,11 @@ XmlElement* SmugMug::smugMugRequest(const String& method, const StringPairArray&
 	for (int i = 0; i < keys.size(); i++)
 		url = url.withParameter(keys[i], vals[i]);
 
-	XmlElement* x = url.readEntireXmlStream(upload);
+	auto x = url.readEntireXmlStream(upload);
 #ifdef JUCE_DEBUG
 	Logger::outputDebugString(url.toString(true));
 	if (x)
-		Logger::outputDebugString(x->createDocument("", true));
+		Logger::outputDebugString(x->toString());
 #endif
 	if (x && x->getStringAttribute(("stat")) == ("fail"))
 	{
@@ -1055,7 +1023,7 @@ SmugID SmugMug::uploadFile(int queue, int index)
 
 				String xml = response.fromFirstOccurrenceOf(("<?xml"), true, true); 
 				XmlDocument doc(xml);
-				XmlElement* e = doc.getDocumentElement();
+				auto e = doc.getDocumentElement();
 				if (e)
 				{
 					XmlElement* image = e->getChildByName(("Image"));
@@ -1076,11 +1044,9 @@ SmugID SmugMug::uploadFile(int queue, int index)
 							retval.id  = val;
 							retval.key = image->getStringAttribute(("Key"));
 								
-							delete e;
 							return retval;
 						}
 					}
-					delete e;
 				}
 			}
 		} 		

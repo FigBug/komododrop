@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created with Projucer version: 5.3.2
+  Created with Projucer version: 5.4.3
 
   ------------------------------------------------------------------------------
 
@@ -260,14 +260,13 @@ BEGIN_JUCER_METADATA
   <LABEL name="label2" id="ec6c668c4d0b411d" memberName="label2" virtualName=""
          explicitFocusOrder="0" pos="16 48 104 24" edTextCol="ff000000"
          edBkgCol="0" labelText="password:" editableSingleClick="0" editableDoubleClick="0"
-         focusDiscardsChanges="0" fontname="Default font" fontsize="15.00000000000000000000"
-         kerning="0.00000000000000000000" bold="0" italic="0" justification="33"/>
+         focusDiscardsChanges="0" fontname="Default font" fontsize="1.5e1"
+         kerning="0" bold="0" italic="0" justification="33"/>
   <LABEL name="label1" id="75f19df5ed823858" memberName="label1" virtualName=""
          explicitFocusOrder="0" pos="16 16 104 24" edTextCol="ff000000"
          edBkgCol="0" labelText="email address:" editableSingleClick="0"
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
-         fontsize="15.00000000000000000000" kerning="0.00000000000000000000"
-         bold="0" italic="0" justification="33"/>
+         fontsize="1.5e1" kerning="0" bold="0" italic="0" justification="33"/>
   <TEXTEDITOR name="email" id="a9220190b5eb5b13" memberName="email" virtualName=""
               explicitFocusOrder="0" pos="128 16 200 24" initialText="" multiline="0"
               retKeyStartsLine="0" readonly="0" scrollbars="1" caret="1" popupmenu="1"/>
@@ -287,16 +286,14 @@ BEGIN_JUCER_METADATA
                 virtualName="" explicitFocusOrder="0" pos="64 104 150 24" buttonText="check for duplicates"
                 connectedEdges="0" needsCallback="1" radioGroupId="0" state="0"/>
   <SLIDER name="threads" id="35f0013081e13bf1" memberName="threads" virtualName=""
-          explicitFocusOrder="0" pos="176 128 128 24" min="1.00000000000000000000"
-          max="16.00000000000000000000" int="1.00000000000000000000" style="IncDecButtons"
-          textBoxPos="TextBoxLeft" textBoxEditable="1" textBoxWidth="80"
-          textBoxHeight="20" skewFactor="1.00000000000000000000" needsCallback="1"/>
+          explicitFocusOrder="0" pos="176 128 128 24" min="1" max="1.6e1"
+          int="1" style="IncDecButtons" textBoxPos="TextBoxLeft" textBoxEditable="1"
+          textBoxWidth="80" textBoxHeight="20" skewFactor="1" needsCallback="1"/>
   <LABEL name="label" id="f6bc37f58b818a10" memberName="label" virtualName=""
          explicitFocusOrder="0" pos="64 128 112 24" edTextCol="ff000000"
          edBkgCol="0" labelText="upload threads:" editableSingleClick="0"
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
-         fontsize="15.00000000000000000000" kerning="0.00000000000000000000"
-         bold="0" italic="0" justification="33"/>
+         fontsize="1.5e1" kerning="0" bold="0" italic="0" justification="33"/>
 </JUCER_COMPONENT>
 
 END_JUCER_METADATA
@@ -306,3 +303,4 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
+

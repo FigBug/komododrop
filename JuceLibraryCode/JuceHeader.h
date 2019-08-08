@@ -14,6 +14,8 @@
 
 #include "AppConfig.h"
 
+#include <gin/gin.h>
+#include <gin_metadata/gin_metadata.h>
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_devices/juce_audio_devices.h>
 #include <juce_audio_formats/juce_audio_formats.h>
@@ -40,6 +42,7 @@
 namespace ProjectInfo
 {
     const char* const  projectName    = "KomodoDrop";
+    const char* const  companyName    = "Roland Rabien";
     const char* const  versionString  = "0.0.0.7";
     const int          versionNumber  = 0x7;
 }
