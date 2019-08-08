@@ -163,3 +163,5 @@ pip-log.txt
 .DS_Store
 
 Builds/MacOSX/KomodoDrop.xcodeproj/project.xcworkspace/xcuserdata/rrabien.xcuserdatad/UserInterfaceState.xcuserstate
+
+xcuserdata

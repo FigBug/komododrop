@@ -1,3 +1,6 @@
 [submodule "modules/JUCE"]
 	path = modules/JUCE
 	url = git@github.com:WeAreROLI/JUCE.git
+[submodule "modules/Gin"]
+	path = modules/Gin
+	url = git@github.com:FigBug/Gin.git
