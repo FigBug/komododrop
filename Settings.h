@@ -50,5 +50,5 @@ public:
 
 	juce_DeclareSingleton(Settings, true);
 private:
-	PropertiesFile* props;
+    std::unique_ptr<PropertiesFile> props;
 };

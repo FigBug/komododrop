@@ -175,8 +175,7 @@ private:
 };
 
 //==============================================================================
-class SmugMug :	public Timer,
-				public ChangeBroadcaster
+class SmugMug : public ChangeBroadcaster
 {
 public:
 	SmugMug();

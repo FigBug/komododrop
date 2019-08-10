@@ -413,8 +413,8 @@ SmugMug::SmugMug()
 void SmugMug::authorizeIfNeeded()
 {
     auto& settings = *Settings::getInstance();
-    if (settings.accessToken.isNotEmpty())
-        return;
+    //if (settings.accessToken.isNotEmpty())
+    //    return;
     
     OAuth::Consumer consumer (consumer_key, consumer_secret);
     OAuth::Client oauth (&consumer);
@@ -427,7 +427,7 @@ void SmugMug::authorizeIfNeeded()
     
     OAuth::Token request_token = OAuth::Token::extract (rsp1.toStdString());
     
-    std::string url2 = authorize_url + "?oauth_token=" + request_token.key();
+    std::string url2 = authorize_url + "?oauth_token=" + request_token.key() + "&Access='Full'&Permissions='Modify'";
     URL (url2.c_str()).launchInDefaultBrowser();
     
     std::string pin = getPin().toStdString();
@@ -856,11 +856,7 @@ SmugID SmugMug::createAlbum(const String& title, const int categoryId, const Str
 std::unique_ptr<XmlElement> SmugMug::smugMugRequest(const String& method, const StringPairArray& params_, bool upload)
 {
 	StringPairArray params(params_);
-	params.set(("method"), method);
-	params.set(("APIKey"), API_KEY);
-
-	if (sessionId.isNotEmpty())
-		params.set (("SessionID"), sessionId);
+	params.set (("method"), method);
 
 	URL url (upload ? UPLOAD_URL : BASE_URL);
 
@@ -869,13 +865,26 @@ std::unique_ptr<XmlElement> SmugMug::smugMugRequest(const String& method, const 
 
 	for (int i = 0; i < keys.size(); i++)
 		url = url.withParameter (keys[i], vals[i]);
+    
+    auto& s = *Settings::getInstance();
+    
+    OAuth::Consumer consumer (consumer_key, consumer_secret);
+    OAuth::Token token (s.accessToken.toStdString(), s.accessSecret.toStdString());
+    OAuth::Client oauth (&consumer, &token);
+    
+    auto queryParams = url.toString (true).fromFirstOccurrenceOf ("?", false, false);
+    auto baseUrl = url.toString (false);
+    std::string oAuthQueryString = oauth.getURLQueryString (OAuth::Http::Get, baseUrl.toStdString() + "?" + queryParams.toStdString());
 
-	auto x = url.readEntireXmlStream (upload);
+    auto newUrl = baseUrl + "?" + String (oAuthQueryString.c_str());
+	auto x = URL (newUrl).readEntireXmlStream (upload);
+    
    #ifdef JUCE_DEBUG
 	Logger::outputDebugString (url.toString (true));
 	if (x != nullptr)
 		Logger::outputDebugString (x->toString());
    #endif
+    
 	if (x != nullptr && x->getStringAttribute (("stat")) == ("fail"))
 		if (auto err = x->getChildByName (("err")))
 			addLogEntry(("Error: ") + err->getStringAttribute (("msg")));
@@ -1155,12 +1164,6 @@ int64 SmugMug::getTotalBytesToUpload()
 		}
 	}
 	return uploaded;
-}
-
-void SmugMug::timerCallback()
-{
-	stopTimer();
-	logout();
 }
 
 int SmugMug::getNumFailedUploads()

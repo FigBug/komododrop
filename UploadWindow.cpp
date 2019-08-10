@@ -84,22 +84,22 @@ UploadWindow::UploadWindow()
 
 	setVisible(true);
 	
-#if defined (JUCE_WIN32) || defined (JUCE_LINUX)
+   #if defined (JUCE_WIN32) || defined (JUCE_LINUX)
 	trayIcon = new TrayIcon(this);
-#endif
-#ifdef JUCE_MAC
+   #endif
+   #ifdef JUCE_MAC
 	MenuBarModel::setMacMainMenu(this);
-#endif
+   #endif
 }
 
 UploadWindow::~UploadWindow()
 {
-#ifdef JUCE_MAC
-	MenuBarModel::setMacMainMenu(NULL);
-#endif
-#if defined (JUCE_WIN32) || defined (JUCE_LINUX)	
+   #if JUCE_MAC
+	MenuBarModel::setMacMainMenu (nullptr);
+   #endif
+   #if JUCE_WIN32 || JUCE_LINUX
 	delete trayIcon;
-#endif
+   #endif
 	deleteAllChildren();
 }
 
@@ -166,11 +166,14 @@ void UploadWindow::userTriedToCloseWindow()
 
 void UploadWindow::mouseDrag(const MouseEvent& e)
 {
-	if (!drag)
-		dragger.startDraggingComponent(this, e);
+    if (e.getDistanceFromDragStart() >= 3)
+    {
+        if (! drag)
+            dragger.startDraggingComponent(this, e);
 
-	drag = true;
-	dragger.dragComponent(this, e, NULL);
+        drag = true;
+        dragger.dragComponent (this, e, nullptr);
+    }
 }
 
 void UploadWindow::mouseDown(const MouseEvent& e)
@@ -216,7 +219,9 @@ PopupMenu UploadWindow::createMenu()
 	sub3.addItem(17, "Show Queue");
 	sub3.addItem(14, "Show log");
 	sub3.addItem(15, "Clear log");
+   #if JUCE_DEBUG
 	sub3.addItem(18, "Show top photos");
+   #endif
 
 	PopupMenu m;
 	

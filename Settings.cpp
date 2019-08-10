@@ -35,7 +35,7 @@ Settings::Settings()
 	opts.millisecondsBeforeSaving	= 1000;
 	opts.osxLibrarySubFolder		= "Application Support";
 
-	props = new PropertiesFile(opts);
+    props = std::make_unique<PropertiesFile> (opts);
 
 	accessToken     = props->getValue("accessToken");
 	accessSecret    = props->getValue("accessSecret");
@@ -72,7 +72,7 @@ Settings::Settings()
 Settings::~Settings()
 {
 	save();
-	delete props;
+    clearSingletonInstance();
 }
 
 void Settings::save()
