@@ -2,38 +2,36 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+class SmugMug;
+class DupeThread;
+
+//==============================================================================
 class SmugID
 {
 public:
-	SmugID()
-	{
-		id = -1;
-	}
+    SmugID() = default;
 
-	int id;
+	int id = -1;
 	String key;
 };
 
+//==============================================================================
 class UploadFile
 {
 public:
-	UploadFile()
-	{
-		status = Waiting;
-		complete = 0;
-		size = 0;
-	}
+    UploadFile() = default;
 
 	enum Status { Waiting, Uploading, Finished, Failed, Cancelled, Duplicate };
 
 	File file;
-	int size;
-	float complete;
-	Status status;
+	int size = 0;
+	float complete = 0;
+	Status status = Waiting;
 	SmugID id;
 	String url;
 };
 
+//==============================================================================
 class UploadRequest
 {
 public:
@@ -74,6 +72,7 @@ private:
 	OwnedArray<UploadFile> imageFiles;
 };
 
+//==============================================================================
 class Category
 {
 public:
@@ -81,6 +80,7 @@ public:
 	String title;
 };
 
+//==============================================================================
 class SubCategory
 {
 public:
@@ -89,6 +89,7 @@ public:
 	String title;
 };
 
+//==============================================================================
 class Album
 {
 public:
@@ -102,6 +103,7 @@ public:
 	String getDisplayTitle();
 };
 
+//==============================================================================
 class ImageItem
 {
 public:
@@ -128,6 +130,7 @@ public:
 	String albumURL;
 };
 
+//==============================================================================
 class ImageUrls
 {
 public:
@@ -140,6 +143,7 @@ public:
 	String albumURL;
 };
 
+//==============================================================================
 class LogItem
 {
 public:
@@ -147,6 +151,7 @@ public:
 	String message;
 };
 
+//==============================================================================
 class Views
 {
 public:
@@ -154,7 +159,7 @@ public:
 	int views;
 };
 
-class SmugMug;
+//==============================================================================
 class UploadThread : public Thread, 
                      public AsyncUpdater
 {
@@ -169,7 +174,7 @@ private:
 	SmugMug* smugMug;
 };
 
-class DupeThread;
+//==============================================================================
 class SmugMug :	public Timer,
 				public ChangeBroadcaster
 {
@@ -227,13 +232,18 @@ private:
 	friend class UploadThread;
 	friend class LogDialog;
 
-	SmugID uploadFile(int queue, int index);
-    std::unique_ptr<XmlElement> smugMugRequest(const String& method, const StringPairArray& params, bool upload = false);
-	void addLogEntry(const String& message);
+    void authorizeIfNeeded();
+    StringPairArray getRequestToken();
+    void launchAuthorizeUrl (const StringPairArray& requestToken);
+    StringPairArray getAccessToken (const StringPairArray& requestToken, const String& code);
+    
+	SmugID uploadFile (int queue, int index);
+    std::unique_ptr<XmlElement> smugMugRequest (const String& method, const StringPairArray& params, bool upload = false);
+	void addLogEntry (const String& message);
 	String sessionId;
 	String accountType;
 
-	bool getNextFileToDo(int& queue, int& index);
+	bool getNextFileToDo (int& queue, int& index);
 
 	CriticalSection lock;
 	OwnedArray<UploadRequest> uploadQueue;

@@ -1,12 +1,14 @@
 #include "Smugmug.h"
 #include "Settings.h"
 
-#define BASE_URL   "https://api.smugmug.com/services/api/rest/1.3.0/"
-#define UPLOAD_URL "http://upload.smugmug.com/services/api/rest/1.3.0/"
-#define APIKEY     "gaEJ900gzH9ucFiUxBYd9sRfj6T3iTiM"
+#define BASE_URL    "https://secure.smugmug.com/services/api/rest/1.3.0/"
+#define UPLOAD_URL  "https://upload.smugmug.com/services/api/rest/1.3.0/"
+#define API_KEY     "Vbq5JHJfC8sBrMRdKPqb7GDs9p8RSTkj"
+#define API_SECRET  "xSRXGphmCZK6GmSBdD9rkGLQzgd3pNvVQGsBWLgx7Z7GhSf8xGggLchNSNBbfZ9j"
 
 #define LOGOUT_TIMER (10 * 60 * 1000)
 
+//==============================================================================
 class FileItem : public TreeViewItem
 {
 public:
@@ -47,6 +49,7 @@ private:
 	int file;
 };
 
+//==============================================================================
 class QueueItem : public TreeViewItem
 {
 public:
@@ -78,6 +81,7 @@ private:
 	int idx;
 };
 
+//==============================================================================
 class RootItem : public TreeViewItem
 {
 public:
@@ -99,6 +103,7 @@ public:
 	}
 };
 
+//==============================================================================
 class QueueDialog : public DialogWindow, public Timer
 {
 public:
@@ -117,8 +122,8 @@ public:
 
 	~QueueDialog()
 	{
-		TreeViewItem* tvi = tree->getRootItem();
-		tree->setRootItem(NULL);
+		auto tvi = tree->getRootItem();
+		tree->setRootItem (nullptr);
 		delete tvi;
 		stopTimer();
 	}
@@ -138,12 +143,15 @@ private:
 	TreeView* tree;
 };
 
+//==============================================================================
 class LogDialog : public DialogWindow, 
 	              public ListBoxModel, 
 				  public ChangeListener
 {
 public:
-	LogDialog(SmugMug* smugMug_) : DialogWindow(("Komodo Drop"), LookAndFeel::getDefaultLookAndFeel().findColour(AlertWindow::backgroundColourId), true), smugMug(smugMug_)
+	LogDialog (SmugMug* smugMug_)
+        : DialogWindow (("Komodo Drop"), LookAndFeel::getDefaultLookAndFeel().findColour(AlertWindow::backgroundColourId), true),
+        smugMug (smugMug_)
 	{
 		centreWithSize(600, 450);
 		list = new ListBox("", this);
@@ -186,6 +194,7 @@ private:
 	ListBox* list;
 };
 
+//==============================================================================
 int UploadRequest::nextUploadId = 1;
 
 UploadRequest::UploadRequest()
@@ -286,13 +295,15 @@ bool UploadRequest::getIgnore()
 	return ignore;
 }
 
-class DupeThread : public Thread, public AsyncUpdater
+//==============================================================================
+class DupeThread : public Thread,
+                   public AsyncUpdater
 {
 public:
-	DupeThread(SmugMug* smugmug_, UploadRequest* ur_)
-      : Thread(("DupesThread")), 
-        smugmug(smugmug_), 
-        ur(ur_)
+	DupeThread (SmugMug* smugmug_, UploadRequest* ur_)
+      : Thread (("DupesThread")),
+        smugmug (smugmug_),
+        ur (ur_)
 	{
 	}
 
@@ -358,6 +369,7 @@ private:
 	UploadRequest* ur;
 };
 
+//==============================================================================
 String Album::getDisplayTitle()
 {
 	if (category.isNotEmpty() && subCategory.isNotEmpty())
@@ -374,8 +386,113 @@ String Album::getDisplayTitle()
 	}
 }
 
+//==============================================================================
 SmugMug::SmugMug()
 {
+    authorizeIfNeeded();
+}
+
+void SmugMug::authorizeIfNeeded()
+{
+    auto requestToken = getRequestToken();
+    if (requestToken.size() > 0)
+    {
+        launchAuthorizeUrl (requestToken);
+        
+        AlertWindow aw ("Komodo Drop", "Authorization:", AlertWindow::InfoIcon);
+        aw.addTextEditor ("code", "", "Code:");
+        aw.addButton ("ok", 1);
+        aw.addButton ("cancel", 2);
+        
+        if (aw.runModalLoop() == 1 && aw.getTextEditorContents ("code").isNotEmpty())
+        {
+            auto id = aw.getTextEditorContents ("code");
+            
+            getAccessToken (requestToken, id);
+        }
+    }
+}
+
+void SmugMug::launchAuthorizeUrl (const StringPairArray& requestToken)
+{
+    StringPairArray params;
+    params.set ("oauth_consumer_key", API_KEY);
+    params.set ("oauth_nonce", Uuid().toString());
+    params.set ("oauth_signature_method", "PLAINTEXT");
+    params.set ("oauth_timestamp", String (Time::currentTimeMillis() / 1000));
+    params.set ("oauth_token", requestToken["oauth_token"]);
+    params.set ("access", "Full");
+    params.set ("permissions", "Modify");
+    params.set ("oauth_callback", "oob");
+    params.set ("oauth_signature", String (API_SECRET) + "&");
+    
+    URL url ("https://api.smugmug.com/services/oauth/1.0a/authorize");
+    
+    StringArray keys = params.getAllKeys();
+    StringArray vals = params.getAllValues();
+    
+    for (int i = 0; i < keys.size(); i++)
+        url = url.withParameter (keys[i], vals[i]);
+
+    url.launchInDefaultBrowser();
+}
+
+StringPairArray SmugMug::getRequestToken()
+{
+    StringPairArray params;
+    params.set ("oauth_consumer_key", API_KEY);
+    params.set ("oauth_nonce", Uuid().toString());
+    params.set ("oauth_signature_method", "PLAINTEXT");
+    params.set ("oauth_timestamp", String (Time::currentTimeMillis() / 1000));
+    params.set ("oauth_callback", "oob");
+    params.set ("oauth_signature", String (API_SECRET) + "&");
+    
+    URL url ("https://api.smugmug.com/services/oauth/1.0a/getRequestToken");
+    
+    StringArray keys = params.getAllKeys();
+    StringArray vals = params.getAllValues();
+    
+    for (int i = 0; i < keys.size(); i++)
+        url = url.withParameter (keys[i], vals[i]);
+    
+    auto x = url.readEntireTextStream();
+    DBG(x);
+
+    StringPairArray res;
+    auto tokens = StringArray::fromTokens(x, "&", "");
+    for (auto t : tokens)
+    {
+        auto v = StringArray::fromTokens(t, "=", "");
+        res.set (v[0], v[1]);
+    }
+
+    return res;
+}
+
+StringPairArray SmugMug::getAccessToken (const StringPairArray& requestToken, const String& code)
+{
+    StringPairArray params;
+    params.set ("oauth_consumer_key", API_KEY);
+    params.set ("oauth_nonce", Uuid().toString());
+    params.set ("oauth_signature_method", "PLAINTEXT");
+    params.set ("oauth_timestamp", String (Time::currentTimeMillis() / 1000));
+    params.set ("oauth_verifier", code);
+    params.set ("oauth_token", requestToken["oauth_token"]);
+    params.set ("oauth_token_secret", requestToken["oauth_token_secret"]);
+    params.set ("oauth_signature", String (API_SECRET) + "&");
+    
+    URL url ("https://api.smugmug.com/services/oauth/1.0a/getAccessToken");
+    
+    StringArray keys = params.getAllKeys();
+    StringArray vals = params.getAllValues();
+    
+    for (int i = 0; i < keys.size(); i++)
+        url = url.withParameter (keys[i], vals[i]);
+    
+    auto x = url.readEntireTextStream();
+    
+    DBG (url.toString (true));
+    DBG (x);
 }
 
 SmugMug::~SmugMug()
@@ -392,19 +509,19 @@ void SmugMug::login(const String& username, const String& password)
 	params.set(("EmailAddress"), username);
 	params.set(("Password"), password);
 
-	auto n = smugMugRequest(("smugmug.login.withPassword"), params);
+	auto n = smugMugRequest (("smugmug.login.withPassword"), params);
 	
 	if (n)
 	{
-		XmlElement* l = n->getChildByName(("Login"));
+		XmlElement* l = n->getChildByName (("Login"));
 		if (l)
 		{
-			accountType = l->getStringAttribute(("AccountType"));
-			XmlElement* s = l->getChildByName(("Session"));
+			accountType = l->getStringAttribute (("AccountType"));
+			XmlElement* s = l->getChildByName (("Session"));
 			if (s)
 			{
 				sessionId = s->getStringAttribute(("id"));
-				addLogEntry(("Info: logged in session: ") + sessionId);
+				addLogEntry (("Info: logged in session: ") + sessionId);
 			}
 		}
 	}
@@ -412,12 +529,12 @@ void SmugMug::login(const String& username, const String& password)
 
 bool SmugMug::isPower()
 {
-	return accountType == ("Power") || isPro();
+	return accountType == "Power" || isPro();
 }
 
 bool SmugMug::isPro()
 {
-	return accountType == ("Pro");
+	return accountType == "Pro";
 }
 
 bool SmugMug::isLoggedIn()
@@ -428,9 +545,9 @@ bool SmugMug::isLoggedIn()
 void SmugMug::logout()
 {
 	StringPairArray params;
-	auto n = smugMugRequest(("smugmug.logout"), params);
+	auto n = smugMugRequest (("smugmug.logout"), params);
 
-	addLogEntry(("Info: logged out session ") + sessionId);
+	addLogEntry (("Info: logged out session ") + sessionId);
 
 	sessionId = "";
 }
@@ -809,44 +926,40 @@ std::unique_ptr<XmlElement> SmugMug::smugMugRequest(const String& method, const 
 {
 	StringPairArray params(params_);
 	params.set(("method"), method);
-	params.set(("APIKey"), APIKEY);
+	params.set(("APIKey"), API_KEY);
 
 	startTimer(LOGOUT_TIMER);
 
 	if (sessionId.isNotEmpty())
-		params.set(("SessionID"), sessionId);
+		params.set (("SessionID"), sessionId);
 
-	URL url(upload ? UPLOAD_URL : BASE_URL);
+	URL url (upload ? UPLOAD_URL : BASE_URL);
 
 	StringArray keys = params.getAllKeys();
 	StringArray vals = params.getAllValues();
 
 	for (int i = 0; i < keys.size(); i++)
-		url = url.withParameter(keys[i], vals[i]);
+		url = url.withParameter (keys[i], vals[i]);
 
-	auto x = url.readEntireXmlStream(upload);
-#ifdef JUCE_DEBUG
-	Logger::outputDebugString(url.toString(true));
-	if (x)
-		Logger::outputDebugString(x->toString());
-#endif
-	if (x && x->getStringAttribute(("stat")) == ("fail"))
-	{
-		XmlElement* err = x->getChildByName(("err"));
-		if (err)
-		{
-			addLogEntry(("Error: ") + err->getStringAttribute(("msg")));
-		}
-	}
+	auto x = url.readEntireXmlStream (upload);
+   #ifdef JUCE_DEBUG
+	Logger::outputDebugString (url.toString (true));
+	if (x != nullptr)
+		Logger::outputDebugString (x->toString());
+   #endif
+	if (x != nullptr && x->getStringAttribute (("stat")) == ("fail"))
+		if (auto err = x->getChildByName (("err")))
+			addLogEntry(("Error: ") + err->getStringAttribute (("msg")));
+    
 	return x;
 }
 
-void SmugMug::uploadImages(UploadRequest* ur, bool allowDupeCheck)
+void SmugMug::uploadImages (UploadRequest* ur, bool allowDupeCheck)
 {
 	if (Settings::getInstance()->checkForDupes && allowDupeCheck)
 	{
 		lock.enter();
-		Thread* t = new DupeThread(this, ur);
+		auto t = new DupeThread(this, ur);
 		dupeThreads.add(t);
 		t->startThread();
 		lock.exit();
@@ -856,37 +969,35 @@ void SmugMug::uploadImages(UploadRequest* ur, bool allowDupeCheck)
 		lock.enter();
 
 		if (uploadThreads.size() == 0)
-		{
 			for (int i = 0;i < uploadQueue.size(); i++)
-				uploadQueue[i]->setIgnore(true);
-		}
+				uploadQueue[i]->setIgnore (true);
 
-		uploadQueue.add(ur);
+		uploadQueue.add (ur);
 
 		while (uploadThreads.size() < Settings::getInstance()->uploadThreads)
 		{
-			UploadThread* ut = NULL;
-			uploadThreads.add(ut = new UploadThread(this));
+			auto ut = new UploadThread (this);
+			uploadThreads.add (ut);
 			ut->startThread();
 		}
 		lock.exit();
 	}
 }
 
-SmugID SmugMug::uploadFile(int queue, int index)
+SmugID SmugMug::uploadFile (int queue, int index)
 {
 	SmugID retval;
 
 	lock.enter();
-	UploadFile& uf = uploadQueue[queue]->getImageFileInfo(index);
+	UploadFile& uf = uploadQueue[queue]->getImageFileInfo (index);
 	lock.exit();
 
 	int64 bytesDone = 0;
-	MD5 md5(uf.file);
+	MD5 md5 (uf.file);
 
 	Time start = Time::getCurrentTime();
 
-	startTimer(LOGOUT_TIMER);
+	startTimer (LOGOUT_TIMER);
 
 	String headers;
     String filename = uf.file.getFileName();
@@ -895,42 +1006,40 @@ SmugID SmugMug::uploadFile(int queue, int index)
 			  "Content-Length: " + String(uf.file.getSize()) + "\r\n" +
 		      "Content-MD5: " + md5.toHexString() + "\r\n" +
 			  "X-Smug-SessionID: " + sessionId + "\r\n" +
-			  "X-Smug-Version: 1.2.2\r\n" +
+			  "X-Smug-Version: 1.3.0\r\n" +
 			  "X-Smug-ResponseType: REST\r\n" +
 			  "X-Smug-AlbumID: " + String(uploadQueue[queue]->getAlbumId().id) + "\r\n" +
 			  "X-Smug-FileName: " + filename + "\r\n\r\n";
 
-#ifdef JUCE_DEBUG
-	Logger::outputDebugString(headers);
-#endif
+   #ifdef JUCE_DEBUG
+	Logger::outputDebugString (headers);
+  #endif
 
-	const char* headerUtf8 = headers.toUTF8();
+	auto headerUtf8 = headers.toUTF8();
 
-	StreamingSocket soc;
+    gin::SecureStreamingSocket soc;
 
-	if (soc.connect("upload.smugmug.com", 80))
+	if (soc.connect ("upload.smugmug.com", 443))
 	{
-		int bytesWritten = soc.write(headerUtf8, (int)strlen(headerUtf8));
+		int bytesWritten = soc.write (headerUtf8, (int)strlen (headerUtf8));
 		if (bytesWritten == -1)
 		{
 			uf.status = UploadFile::Failed;
 			return retval;
 		}
 
-		FileInputStream* fos = uf.file.createInputStream();
-		if (fos)
+        if (auto fos = std::unique_ptr<FileInputStream> (uf.file.createInputStream()))
 		{
 			char buffer[1024 * 8];
-			while (!fos->isExhausted())
+			while (! fos->isExhausted())
 			{
-				int in = fos->read(buffer, sizeof(buffer));
-				int out = soc.write(buffer, in);
+				int in = fos->read (buffer, sizeof (buffer));
+				int out = soc.write (buffer, in);
 
-				startTimer(LOGOUT_TIMER);
+				startTimer (LOGOUT_TIMER);
 
 				if (in != out)
 				{
-					delete fos;
 					uf.status = UploadFile::Failed;
 					return retval;
 				}
@@ -942,11 +1051,9 @@ SmugID SmugMug::uploadFile(int queue, int index)
 
 				if (uf.status == UploadFile::Cancelled)
 				{
-					delete fos;
 					return retval;
 				}
 			}
-			delete fos;
 		}
 		else
 		{
@@ -957,18 +1064,18 @@ SmugID SmugMug::uploadFile(int queue, int index)
 		String response;
 		response.preallocateBytes(1024);
 
-		while (1)
+		while (true)
 		{
 			char buffer;
-			int read = soc.read(&buffer, 1, true);
+			int read = soc.read (&buffer, 1, true);
 			if (read == -1)
 				break;
 
 			response += buffer;
 
-			if (response.endsWith(("\r\n\r\n")) || response.endsWith(("\n\n")))
+			if (response.endsWith (("\r\n\r\n")) || response.endsWith (("\n\n")))
 			{
-				String len = response.fromFirstOccurrenceOf(("Content-Length: "), false, true);
+				String len = response.fromFirstOccurrenceOf (("Content-Length: "), false, true);
 				if (len.isNotEmpty())
 				{
 					// normal mode
@@ -990,13 +1097,13 @@ SmugID SmugMug::uploadFile(int queue, int index)
 				else
 				{
 					// chunked
-					while (1)
+					while (true)
 					{
 						String line;
 						char ch;
-						while (!line.endsWith("\r\n"))
+						while (! line.endsWith ("\r\n"))
 						{
-							soc.read(&ch, 1, true);
+							soc.read (&ch, 1, true);
 							line += ch;
 						}
 
@@ -1005,36 +1112,35 @@ SmugID SmugMug::uploadFile(int queue, int index)
 							break;
 
 						char* buf = new char[sz + 1];
-						soc.read(buf, sz, true);
+						soc.read (buf, sz, true);
 						buf[sz] = 0;
 
 						response += buf;
 						delete[] buf;
 
-						soc.read(&ch, 1, true);
-						soc.read(&ch, 1, true);
+						soc.read (&ch, 1, true);
+						soc.read (&ch, 1, true);
 					}
 				}
 
-#ifdef JUCE_DEBUG				
+               #ifdef JUCE_DEBUG
 				Logger::outputDebugString(response);
-#endif
+               #endif
 				soc.close();
 
-				String xml = response.fromFirstOccurrenceOf(("<?xml"), true, true); 
-				XmlDocument doc(xml);
-				auto e = doc.getDocumentElement();
-				if (e)
+				String xml = response.fromFirstOccurrenceOf (("<?xml"), true, true);
+				XmlDocument doc (xml);
+				
+				if (auto e = doc.getDocumentElement())
 				{
-					XmlElement* image = e->getChildByName(("Image"));
-					if (image)
+					if (auto image = e->getChildByName (("Image")))
 					{
-						int val = image->getIntAttribute(("id"));
+						int val = image->getIntAttribute (("id"));
 						if (val >= 0)
 						{
 							uf.status = UploadFile::Finished;
 							uf.complete = 1.0f;
-							uf.url = image->getStringAttribute("URL");
+							uf.url = image->getStringAttribute ("URL");
 
 							Time end = Time::getCurrentTime();
 							RelativeTime diff = end - start;
@@ -1056,7 +1162,7 @@ SmugID SmugMug::uploadFile(int queue, int index)
 	return retval;
 }
 
-bool SmugMug::getNextFileToDo(int& queue, int& index)
+bool SmugMug::getNextFileToDo (int& queue, int& index)
 {
 	lock.enter();
 	for (int i = 0; i < uploadQueue.size(); i++)
@@ -1080,18 +1186,18 @@ bool SmugMug::getNextFileToDo(int& queue, int& index)
 
 bool SmugMug::isUploading()
 {
-	ScopedLock sl(lock);
+	ScopedLock sl (lock);
 	return uploadThreads.size() > 0 || dupeThreads.size() > 0;
 }
 
 int64 SmugMug::getTotalbytesUploaded()
 {
-	ScopedLock sl(lock);
+	ScopedLock sl (lock);
 	int uploaded = 0;
 	for (int i = 0; i < uploadQueue.size(); i++)
 	{
-		UploadRequest* ur = uploadQueue[i];
-		if (!ur->getIgnore())
+		auto ur = uploadQueue[i];
+		if (! ur->getIgnore())
 		{
 			for (int j = 0; j < ur->getNumImages(); j++)
 			{
@@ -1108,16 +1214,16 @@ int64 SmugMug::getTotalbytesUploaded()
 
 int64 SmugMug::getTotalBytesToUpload()
 {
-	ScopedLock sl(lock);
+	ScopedLock sl (lock);
 	int uploaded = 0;
 	for (int i = 0; i < uploadQueue.size(); i++)
 	{
-		UploadRequest* ur = uploadQueue[i];
-		if (!ur->getIgnore())
+		auto ur = uploadQueue[i];
+		if (! ur->getIgnore())
 		{
 			for (int j = 0; j < ur->getNumImages(); j++)
 			{
-				UploadFile& uf = ur->getImageFileInfo(j);
+				auto& uf = ur->getImageFileInfo (j);
 				if (uf.status == UploadFile::Finished || uf.status == UploadFile::Uploading || uf.status == UploadFile::Waiting)
 					uploaded += uf.size;
 			}
@@ -1138,10 +1244,10 @@ int SmugMug::getNumFailedUploads()
 	int failed = 0;
 	for (int i = 0; i < uploadQueue.size(); i++)
 	{
-		UploadRequest* ur = uploadQueue[i];
+		auto ur = uploadQueue[i];
 		for (int j = 0; j < ur->getNumImages(); j++)
 		{
-			UploadFile& uf = ur->getImageFileInfo(j);
+			auto& uf = ur->getImageFileInfo (j);
 			if (uf.status == UploadFile::Failed)
 				failed++;
 		}
@@ -1151,13 +1257,13 @@ int SmugMug::getNumFailedUploads()
 
 void SmugMug::cancelFailedUploads()
 {
-	ScopedLock sl(lock);
+	ScopedLock sl (lock);
 	for (int i = 0; i < uploadQueue.size(); i++)
 	{
-		UploadRequest* ur = uploadQueue[i];
+		auto ur = uploadQueue[i];
 		for (int j = 0; j < ur->getNumImages(); j++)
 		{
-			UploadFile& uf = ur->getImageFileInfo(j);
+			auto& uf = ur->getImageFileInfo(j);
 			if (uf.status == UploadFile::Failed)
 				uf.status = UploadFile::Cancelled;
 		}
@@ -1170,10 +1276,10 @@ void SmugMug::reSubmitFailedUploads()
 
 	for (int i = 0; i < uploadQueue.size(); i++)
 	{
-		UploadRequest* ur = uploadQueue[i];
+		auto ur = uploadQueue[i];
 		for (int j = 0; j < ur->getNumImages(); j++)
 		{
-			UploadFile& uf = ur->getImageFileInfo(j);
+			auto& uf = ur->getImageFileInfo(j);
 			if (uf.status == UploadFile::Failed)
 				uf.status = UploadFile::Waiting;
 		}
@@ -1181,12 +1287,12 @@ void SmugMug::reSubmitFailedUploads()
 
 	while (uploadThreads.size() < Settings::getInstance()->uploadThreads)
 	{
-		UploadThread* ut = NULL;
-		uploadThreads.add(ut = new UploadThread(this));
+		auto ut = new UploadThread (this);
+		uploadThreads.add (ut);
 		ut->startThread();
 	}
 
-	addLogEntry(("Info: failed uploads readded to queue"));
+	addLogEntry (("Info: failed uploads readded to queue"));
 }
 
 void SmugMug::cancelUploads()
@@ -1195,10 +1301,10 @@ void SmugMug::cancelUploads()
 
 	for (int i = 0; i < uploadQueue.size(); i++)
 	{
-		UploadRequest* ur = uploadQueue[i];
+		auto ur = uploadQueue[i];
 		for (int j = 0; j < ur->getNumImages(); j++)
 		{
-			UploadFile& uf = ur->getImageFileInfo(j);
+			auto& uf = ur->getImageFileInfo(j);
 			uf.status = UploadFile::Cancelled;
 		}
 	}
@@ -1208,21 +1314,21 @@ void SmugMug::cancelUploads()
 
 void SmugMug::addLogEntry(const String& message)
 {
-	LogItem* li = new LogItem();
+	auto li = new LogItem();
 	li->message = message;
 	li->time = Time::getCurrentTime();
-	smugLog.add(li);
+	smugLog.add (li);
 	sendChangeMessage();
 }
 
 void SmugMug::showQueue()
 {
-	new QueueDialog(this);
+	new QueueDialog (this);
 }
 
 void SmugMug::showLogFile()
 {
-	new LogDialog(this);
+	new LogDialog (this);
 }
 
 void SmugMug::clearLogFile()
@@ -1237,20 +1343,21 @@ void SmugMug::showTopPhotos()
 
 	OwnedArray<Views> albums;
 	OwnedArray<Views> images;
-	if (getNumberOfViews(tm.getMonth(), tm.getYear(), albums, images))
+	if (getNumberOfViews (tm.getMonth(), tm.getYear(), albums, images))
 	{
 	}
 }
 
-UploadThread::UploadThread(SmugMug* smugMug_) 
-  : Thread(("UploadThread")),
-    smugMug(smugMug_)
+//==============================================================================
+UploadThread::UploadThread (SmugMug* smugMug_)
+  : Thread (("UploadThread")),
+    smugMug (smugMug_)
 {
 }
 
 UploadThread::~UploadThread()
 {
-    stopThread(100);
+    stopThread (100);
 }
 
 void  UploadThread::handleAsyncUpdate()
@@ -1260,13 +1367,13 @@ void  UploadThread::handleAsyncUpdate()
 
 void UploadThread::run()
 {
-	while (1)
+	while (true)
 	{
 		int queue = 0;
 		int index = 0;
-		UploadRequest* ur = NULL;
+		UploadRequest* ur = nullptr;
 		smugMug->lock.enter();	
-		bool res = smugMug->getNextFileToDo(queue, index);
+		bool res = smugMug->getNextFileToDo (queue, index);
 		if (res)
 		{
 			ur = smugMug->uploadQueue[queue];
@@ -1277,14 +1384,14 @@ void UploadThread::run()
 		if (!res)
 		{
 			smugMug->lock.enter();
-			smugMug->uploadThreads.removeFirstMatchingValue(this);
+			smugMug->uploadThreads.removeFirstMatchingValue (this);
 			smugMug->lock.exit();
 			triggerAsyncUpdate();
 			return;
 		}
 		SmugID id = smugMug->uploadFile(queue, index);
 
-		ur->getImageFileInfo(index).id = id;		
+		ur->getImageFileInfo (index).id = id;
 		if (ur->getOpenBrowser())
 		{
 			bool done = true;
@@ -1304,7 +1411,7 @@ void UploadThread::run()
 			}
 			if (done && url.isNotEmpty())
 			{
-				URL(url).launchInDefaultBrowser();
+				URL (url).launchInDefaultBrowser();
 			}
 		}
 	}

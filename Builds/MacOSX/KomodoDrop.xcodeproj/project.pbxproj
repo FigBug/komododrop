@@ -109,6 +109,42 @@
 			isa = PBXBuildFile;
 			fileRef = 6FB8BFAD0AA5E7861FFAB742;
 		};
+		173DDF95AFAEC2BC202F67D4 = {
+			isa = PBXBuildFile;
+			fileRef = C07AFC09ADAC414ECF1E688D;
+		};
+		94B375128173281BC1BD47AF = {
+			isa = PBXBuildFile;
+			fileRef = CF74B056134E1E4CB25832EF;
+		};
+		B89E03C8D50A3874ADB65F8D = {
+			isa = PBXBuildFile;
+			fileRef = 52185837D6F49E891D5E4E84;
+		};
+		9DE3910BB539D5A332E61D5E = {
+			isa = PBXBuildFile;
+			fileRef = 1253FA4D89705E7B5050C654;
+		};
+		82E2778739A1035F9C5A5232 = {
+			isa = PBXBuildFile;
+			fileRef = 669E3C522BBCC56199408D40;
+		};
+		BDC26FEA30BF89E69B418AE6 = {
+			isa = PBXBuildFile;
+			fileRef = F4B69336F4527C7993FABB73;
+		};
+		4671048C35A2EB15AC9A0545 = {
+			isa = PBXBuildFile;
+			fileRef = 8B68CC3BD0A01889F0E90C5E;
+		};
+		E8F9ADEED5B6A0547BDFE919 = {
+			isa = PBXBuildFile;
+			fileRef = 758B83FC607F67B197649BBB;
+		};
+		6E5B2A854C79694CD31FC1A6 = {
+			isa = PBXBuildFile;
+			fileRef = F274901B861AD3D2F2154199;
+		};
 		FA6630BA854C499FB04236FB = {
 			isa = PBXBuildFile;
 			fileRef = F1891B0366809B38921B9C0E;
@@ -194,6 +230,13 @@
 			lastKnownFileType = sourcecode.cpp.objcpp;
 			name = "include_juce_video.mm";
 			path = "../../JuceLibraryCode/include_juce_video.mm";
+			sourceTree = "SOURCE_ROOT";
+		};
+		1253FA4D89705E7B5050C654 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			name = "include_gin_network_mbed3.c";
+			path = "../../JuceLibraryCode/include_gin_network_mbed3.c";
 			sourceTree = "SOURCE_ROOT";
 		};
 		1257941693615417CF71A528 = {
@@ -322,11 +365,25 @@
 			path = "../../JuceLibraryCode/include_juce_core.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
+		4D395E5E3B7C69C5C98AD0CA = {
+			isa = PBXFileReference;
+			lastKnownFileType = file;
+			name = "gin_network";
+			path = "../../modules/Gin/modules/gin_network";
+			sourceTree = "SOURCE_ROOT";
+		};
 		5117E2D5E9A7C281BAB2769E = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.objcpp;
 			name = "include_juce_cryptography.mm";
 			path = "../../JuceLibraryCode/include_juce_cryptography.mm";
+			sourceTree = "SOURCE_ROOT";
+		};
+		52185837D6F49E891D5E4E84 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			name = "include_gin_network_mbed2.c";
+			path = "../../JuceLibraryCode/include_gin_network_mbed2.c";
 			sourceTree = "SOURCE_ROOT";
 		};
 		54DE46B3CC10187004143E07 = {
@@ -348,6 +405,13 @@
 			lastKnownFileType = file;
 			name = "juce_cryptography";
 			path = "../../modules/JUCE/modules/juce_cryptography";
+			sourceTree = "SOURCE_ROOT";
+		};
+		669E3C522BBCC56199408D40 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			name = "include_gin_network_mbed4.c";
+			path = "../../JuceLibraryCode/include_gin_network_mbed4.c";
 			sourceTree = "SOURCE_ROOT";
 		};
 		66C885DA57F19EA7B343E2BF = {
@@ -378,6 +442,13 @@
 			path = "../../modules/JUCE/modules/juce_audio_processors";
 			sourceTree = "SOURCE_ROOT";
 		};
+		758B83FC607F67B197649BBB = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			name = "include_gin_network_mbed7.c";
+			path = "../../JuceLibraryCode/include_gin_network_mbed7.c";
+			sourceTree = "SOURCE_ROOT";
+		};
 		7AF8D2D2F43F6C27CEB88EBB = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.objcpp;
@@ -397,6 +468,13 @@
 			lastKnownFileType = file;
 			name = "juce_gui_extra";
 			path = "../../modules/JUCE/modules/juce_gui_extra";
+			sourceTree = "SOURCE_ROOT";
+		};
+		8B68CC3BD0A01889F0E90C5E = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			name = "include_gin_network_mbed6.c";
+			path = "../../JuceLibraryCode/include_gin_network_mbed6.c";
 			sourceTree = "SOURCE_ROOT";
 		};
 		8F521180E51AE01443648C5C = {
@@ -490,6 +568,13 @@
 			path = "../../JuceLibraryCode/include_juce_audio_formats.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
+		C07AFC09ADAC414ECF1E688D = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.objcpp;
+			name = "include_gin_network.mm";
+			path = "../../JuceLibraryCode/include_gin_network.mm";
+			sourceTree = "SOURCE_ROOT";
+		};
 		C27133293387672006898CD8 = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
@@ -503,6 +588,13 @@
 			name = Security.framework;
 			path = System/Library/Frameworks/Security.framework;
 			sourceTree = SDKROOT;
+		};
+		CF74B056134E1E4CB25832EF = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			name = "include_gin_network_mbed1.c";
+			path = "../../JuceLibraryCode/include_gin_network_mbed1.c";
+			sourceTree = "SOURCE_ROOT";
 		};
 		D2499F2465C004873FD0F1A1 = {
 			isa = PBXFileReference;
@@ -595,6 +687,20 @@
 			path = "../../JuceLibraryCode/include_juce_audio_basics.mm";
 			sourceTree = "SOURCE_ROOT";
 		};
+		F274901B861AD3D2F2154199 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			name = "include_gin_network_mbed8.c";
+			path = "../../JuceLibraryCode/include_gin_network_mbed8.c";
+			sourceTree = "SOURCE_ROOT";
+		};
+		F4B69336F4527C7993FABB73 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			name = "include_gin_network_mbed5.c";
+			path = "../../JuceLibraryCode/include_gin_network_mbed5.c";
+			sourceTree = "SOURCE_ROOT";
+		};
 		F92A2D3D6F9A5565FBF1EBF7 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.objcpp;
@@ -641,6 +747,7 @@
 			children = (
 				D2499F2465C004873FD0F1A1,
 				37CB79C543DE3F41B103AA4E,
+				4D395E5E3B7C69C5C98AD0CA,
 				282C9657EBAB66C7B993A51C,
 				1D6160760D07CC0523D6795A,
 				D65355CE6CA44B8D9318ADCA,
@@ -666,6 +773,15 @@
 				3EA742112EDF1A2DA8F7009C,
 				F92A2D3D6F9A5565FBF1EBF7,
 				6FB8BFAD0AA5E7861FFAB742,
+				C07AFC09ADAC414ECF1E688D,
+				CF74B056134E1E4CB25832EF,
+				52185837D6F49E891D5E4E84,
+				1253FA4D89705E7B5050C654,
+				669E3C522BBCC56199408D40,
+				F4B69336F4527C7993FABB73,
+				8B68CC3BD0A01889F0E90C5E,
+				758B83FC607F67B197649BBB,
+				F274901B861AD3D2F2154199,
 				F1891B0366809B38921B9C0E,
 				234BB32DF796F8AABB9AB357,
 				BDAFFCC57835F66A5C1B79A5,
@@ -766,6 +882,7 @@
 				HEADER_SEARCH_PATHS = (
 					"../../JuceLibraryCode",
 					"../../modules/Gin/modules",
+					"../../modules/Gin/modules/gin_network/3rdparty/mbedtls/include",
 					"../../modules/JUCE/modules",
 					"$(inherited)",
 				);
@@ -810,6 +927,7 @@
 				HEADER_SEARCH_PATHS = (
 					"../../JuceLibraryCode",
 					"../../modules/Gin/modules",
+					"../../modules/Gin/modules/gin_network/3rdparty/mbedtls/include",
 					"../../modules/JUCE/modules",
 					"$(inherited)",
 				);
@@ -958,6 +1076,15 @@
 				2363AA32A07BFE7471479860,
 				FDC26E7640373BF72D3CB82E,
 				ED93BF7BBECE52BB9384B907,
+				173DDF95AFAEC2BC202F67D4,
+				94B375128173281BC1BD47AF,
+				B89E03C8D50A3874ADB65F8D,
+				9DE3910BB539D5A332E61D5E,
+				82E2778739A1035F9C5A5232,
+				BDC26FEA30BF89E69B418AE6,
+				4671048C35A2EB15AC9A0545,
+				E8F9ADEED5B6A0547BDFE919,
+				6E5B2A854C79694CD31FC1A6,
 				FA6630BA854C499FB04236FB,
 				46F766352C7518FABF6C6DE2,
 				0E045B8F7A8CEAF3B2705AD9,

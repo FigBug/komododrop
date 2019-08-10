@@ -48,6 +48,7 @@
         <MODULEPATH id="juce_audio_processors" path="modules/JUCE/modules"/>
         <MODULEPATH id="gin" path="modules/Gin/modules"/>
         <MODULEPATH id="gin_metadata" path="modules/Gin/modules"/>
+        <MODULEPATH id="gin_network" path="modules/Gin/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2017 targetFolder="Builds/VisualStudio2017" smallIcon="bylcTD" bigIcon="bylcTD">
@@ -71,6 +72,7 @@
         <MODULEPATH id="juce_audio_basics" path="modules/JUCE/modules"/>
         <MODULEPATH id="gin" path="modules/Gin/modules"/>
         <MODULEPATH id="gin_metadata" path="modules/Gin/modules"/>
+        <MODULEPATH id="gin_network" path="modules/Gin/modules"/>
       </MODULEPATHS>
     </VS2017>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
@@ -94,12 +96,14 @@
         <MODULEPATH id="juce_audio_basics"/>
         <MODULEPATH id="gin" path="modules/Gin/modules"/>
         <MODULEPATH id="gin_metadata" path="modules/Gin/modules"/>
+        <MODULEPATH id="gin_network" path="modules/Gin/modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="gin" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="gin_metadata" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="gin_network" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>

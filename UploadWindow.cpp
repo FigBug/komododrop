@@ -69,10 +69,10 @@ void UploadDialog::closeButtonPressed()
 
 UploadWindow::UploadWindow()
 {
-	setSize(96, 96);
-	setOpaque(true);
-	addToDesktop(0);
-	setAlwaysOnTop(true);
+	setSize (96, 96);
+	setOpaque (true);
+	addToDesktop (0);
+	setAlwaysOnTop (true);
 
 	juce::Rectangle<int> rc = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
 
