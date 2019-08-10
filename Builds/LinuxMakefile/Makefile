@@ -78,6 +78,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/include_gin_8be23c36.o \
   $(JUCE_OBJDIR)/include_gin_metadata_68356fe2.o \
   $(JUCE_OBJDIR)/include_gin_network_8d161ca5.o \
+  $(JUCE_OBJDIR)/include_gin_network_auth_b86469cc.o \
   $(JUCE_OBJDIR)/include_gin_network_mbed1_80848123.o \
   $(JUCE_OBJDIR)/include_gin_network_mbed2_808484e4.o \
   $(JUCE_OBJDIR)/include_gin_network_mbed3_808488a5.o \
@@ -161,6 +162,11 @@ $(JUCE_OBJDIR)/include_gin_metadata_68356fe2.o: ../../JuceLibraryCode/include_gi
 $(JUCE_OBJDIR)/include_gin_network_8d161ca5.o: ../../JuceLibraryCode/include_gin_network.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling include_gin_network.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_gin_network_auth_b86469cc.o: ../../JuceLibraryCode/include_gin_network_auth.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling include_gin_network_auth.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_gin_network_mbed1_80848123.o: ../../JuceLibraryCode/include_gin_network_mbed1.c

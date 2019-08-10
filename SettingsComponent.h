@@ -58,16 +58,13 @@ private:
     //[/UserVariables]
 
     //==============================================================================
-    std::unique_ptr<Label> label2;
-    std::unique_ptr<Label> label1;
-    std::unique_ptr<TextEditor> email;
-    std::unique_ptr<TextEditor> password;
     std::unique_ptr<TextButton> cancel;
     std::unique_ptr<TextButton> ok;
     std::unique_ptr<ToggleButton> silentUploads;
     std::unique_ptr<ToggleButton> duplicate;
     std::unique_ptr<Slider> threads;
     std::unique_ptr<Label> label;
+    std::unique_ptr<TextButton> auth;
 
 
     //==============================================================================

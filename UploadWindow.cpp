@@ -272,7 +272,7 @@ void UploadWindow::handleCommand(int res)
 	else if (res == 5)
 	{
 		if (!smugMug.isLoggedIn())
-			smugMug.login(Settings::getInstance()->email, Settings::getInstance()->password);
+			smugMug.login();
 
 		OwnedArray<Album> albums;
 		smugMug.getAlbumList(albums);
@@ -301,7 +301,7 @@ void UploadWindow::handleCommand(int res)
 	else if (res == 6)
 	{
 		if (!smugMug.isLoggedIn())
-			smugMug.login(Settings::getInstance()->email, Settings::getInstance()->password);
+			smugMug.login();
 
 		OwnedArray<Category> categories;
 		smugMug.getCategoryList(categories);
@@ -330,7 +330,7 @@ void UploadWindow::handleCommand(int res)
 	else if (res == 7)
 	{
 		if (!smugMug.isLoggedIn())
-			smugMug.login(Settings::getInstance()->email, Settings::getInstance()->password);
+			smugMug.login();
 
 		OwnedArray<Category> categories;
 		smugMug.getCategoryList(categories);
@@ -371,7 +371,7 @@ void UploadWindow::handleCommand(int res)
 	else if (res == 8)
 	{
 		if (!smugMug.isLoggedIn())
-			smugMug.login(Settings::getInstance()->email, Settings::getInstance()->password);
+			smugMug.login();
 
 			AlertWindow aw("Komodo Drop", "Create category:", AlertWindow::InfoIcon);
 			aw.addTextEditor("name", "", "category name:");
@@ -386,7 +386,7 @@ void UploadWindow::handleCommand(int res)
 	else if (res == 9)
 	{
 		if (!smugMug.isLoggedIn())
-			smugMug.login(Settings::getInstance()->email, Settings::getInstance()->password);
+			smugMug.login();
 
 		OwnedArray<Category> categories;
 		smugMug.getCategoryList(categories);
@@ -503,7 +503,7 @@ void UploadWindow::handleCommand(int res)
 	else if (res == 16)
 	{
 		if (!smugMug.isLoggedIn())
-			smugMug.login(Settings::getInstance()->email, Settings::getInstance()->password);
+			smugMug.login();
 
 		OwnedArray<Album> albums;
 		smugMug.getAlbumList(albums);
@@ -536,7 +536,7 @@ void UploadWindow::handleCommand(int res)
 	else if (res == 18)
 	{
 		if (!smugMug.isLoggedIn())
-			smugMug.login(Settings::getInstance()->email, Settings::getInstance()->password);
+			smugMug.login();
 
 		smugMug.showTopPhotos();
 	}
@@ -577,15 +577,8 @@ void UploadWindow::filesDropped(const StringArray& filenames, int mouseX, int mo
 
 	if (ur->getNumImages() > 0)
 	{
-		Settings* settings = Settings::getInstance();
-		if (settings->password.isEmpty() || settings->email.isEmpty())
-			settings->showSettingsDialog();
-
-		if (settings->password.isEmpty() || settings->email.isEmpty())
-			return;
-
 		if (!smugMug.isLoggedIn())
-			smugMug.login(Settings::getInstance()->email, Settings::getInstance()->password);
+			smugMug.login();
 
 		if (!smugMug.isLoggedIn())
 		{
@@ -600,9 +593,9 @@ void UploadWindow::filesDropped(const StringArray& filenames, int mouseX, int mo
 		else 
 			defaultAlbumName = root.getParentDirectory().getFileName();
 
-#ifdef JUCE_DEBUG
+       #ifdef JUCE_DEBUG
 		defaultAlbumName = defaultAlbumName.replaceCharacter('_', ' ');
-#endif
+       #endif
 
 		SmugID albumId;
 		bool open = false;

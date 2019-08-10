@@ -182,7 +182,7 @@ public:
 	SmugMug();
 	~SmugMug();
 
-	void login(const String& username, const String& password);
+	void login();
 	void logout();
 	bool isLoggedIn();
 	void cancelUploads();
@@ -234,8 +234,7 @@ private:
 
     void authorizeIfNeeded();
     StringPairArray getRequestToken();
-    void launchAuthorizeUrl (const StringPairArray& requestToken);
-    StringPairArray getAccessToken (const StringPairArray& requestToken, const String& code);
+    StringPairArray getAccessToken (const StringPairArray& requestToken);
     
 	SmugID uploadFile (int queue, int index);
     std::unique_ptr<XmlElement> smugMugRequest (const String& method, const StringPairArray& params, bool upload = false);

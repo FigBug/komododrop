@@ -12,8 +12,8 @@ public:
 
 	void showSettingsDialog();
 
-	String email;
-	String password;
+	String accessSecret;
+	String accessToken;
 
 	bool silentUpload;
 	bool checkForDupes;

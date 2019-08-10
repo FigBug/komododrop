@@ -249,6 +249,33 @@
     <ClCompile Include="..\..\modules\Gin\modules\gin_metadata\gin_metadata.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\demo\simple_auth.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\demo\simple_request.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\src\base64.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\src\HMAC_SHA1.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\src\liboauthcpp.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\src\SHA1.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\src\urlencode.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\tests\main.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\tests\testutil.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\library\aes.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -642,13 +669,19 @@
     <ClCompile Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\programs\wince_main.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\modules\Gin\modules\gin_network\http\http.cpp">
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\network\http.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\modules\Gin\modules\gin_network\http\securestreamingsocket.cpp">
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\network\oauth.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\network\securestreamingsocket.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\modules\Gin\modules\gin_network\gin_network.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\modules\Gin\modules\gin_network\gin_network_auth.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\modules\Gin\modules\gin_network\gin_network_mbed1.c">
@@ -2392,6 +2425,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_gin.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_gin_metadata.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_gin_network.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_gin_network_auth.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_gin_network_mbed1.c"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_gin_network_mbed2.c"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_gin_network_mbed3.c"/>
@@ -2462,6 +2496,17 @@
     <ClInclude Include="..\..\modules\Gin\modules\gin_metadata\metadata\iptcmetadata.h"/>
     <ClInclude Include="..\..\modules\Gin\modules\gin_metadata\metadata\xmpmetadata.h"/>
     <ClInclude Include="..\..\modules\Gin\modules\gin_metadata\gin_metadata.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\include\liboauthcpp\liboauthcpp.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\src\base64.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\src\HMAC_SHA1.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\src\SHA1.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\src\urlencode.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\tests\fast_request_test.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\tests\long_request_test.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\tests\parsekeyvaluepairs_test.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\tests\request_test.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\tests\testutil.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\tests\urlencode_test.h"/>
     <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\configs\config-ccm-psk-tls1_2.h"/>
     <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\configs\config-mini-tls1_1.h"/>
     <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\configs\config-no-entropy.h"/>
@@ -2552,8 +2597,9 @@
     <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\include\mbedtls\x509_crt.h"/>
     <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\include\mbedtls\x509_csr.h"/>
     <ClInclude Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\include\mbedtls\xtea.h"/>
-    <ClInclude Include="..\..\modules\Gin\modules\gin_network\http\http.h"/>
-    <ClInclude Include="..\..\modules\Gin\modules\gin_network\http\securestreamingsocket.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\network\http.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\network\oauth.h"/>
+    <ClInclude Include="..\..\modules\Gin\modules\gin_network\network\securestreamingsocket.h"/>
     <ClInclude Include="..\..\modules\Gin\modules\gin_network\gin_network.h"/>
     <ClInclude Include="..\..\modules\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h"/>
     <ClInclude Include="..\..\modules\JUCE\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>
@@ -3246,6 +3292,8 @@
     <None Include="..\..\modules\Gin\modules\gin\3rdparty\avir\README.md"/>
     <None Include="..\..\modules\Gin\modules\gin\README.md"/>
     <None Include="..\..\modules\Gin\modules\gin_metadata\README.md"/>
+    <None Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\build\CMakeLists.txt"/>
+    <None Include="..\..\modules\Gin\modules\gin_network\3rdparty\liboauthcpp\README.md"/>
     <None Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\.github\issue_template.md"/>
     <None Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\.github\pull_request_template.md"/>
     <None Include="..\..\modules\Gin\modules\gin_network\3rdparty\mbedtls\configs\README.txt"/>

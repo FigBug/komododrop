@@ -113,6 +113,10 @@
 			isa = PBXBuildFile;
 			fileRef = C07AFC09ADAC414ECF1E688D;
 		};
+		538966546EE178365FAE72A3 = {
+			isa = PBXBuildFile;
+			fileRef = B4417850612416176B15C106;
+		};
 		94B375128173281BC1BD47AF = {
 			isa = PBXBuildFile;
 			fileRef = CF74B056134E1E4CB25832EF;
@@ -540,6 +544,13 @@
 			path = "../../modules/JUCE/modules/juce_opengl";
 			sourceTree = "SOURCE_ROOT";
 		};
+		B4417850612416176B15C106 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = "include_gin_network_auth.cpp";
+			path = "../../JuceLibraryCode/include_gin_network_auth.cpp";
+			sourceTree = "SOURCE_ROOT";
+		};
 		B61A953F471B5C347E9FBD89 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -774,6 +785,7 @@
 				F92A2D3D6F9A5565FBF1EBF7,
 				6FB8BFAD0AA5E7861FFAB742,
 				C07AFC09ADAC414ECF1E688D,
+				B4417850612416176B15C106,
 				CF74B056134E1E4CB25832EF,
 				52185837D6F49E891D5E4E84,
 				1253FA4D89705E7B5050C654,
@@ -1077,6 +1089,7 @@
 				FDC26E7640373BF72D3CB82E,
 				ED93BF7BBECE52BB9384B907,
 				173DDF95AFAEC2BC202F67D4,
+				538966546EE178365FAE72A3,
 				94B375128173281BC1BD47AF,
 				B89E03C8D50A3874ADB65F8D,
 				9DE3910BB539D5A332E61D5E,

@@ -1,12 +1,17 @@
 #include "Smugmug.h"
 #include "Settings.h"
 
-#define BASE_URL    "https://secure.smugmug.com/services/api/rest/1.3.0/"
+#define BASE_URL    "https://api.smugmug.com/services/api/rest/1.3.0/"
 #define UPLOAD_URL  "https://upload.smugmug.com/services/api/rest/1.3.0/"
 #define API_KEY     "Vbq5JHJfC8sBrMRdKPqb7GDs9p8RSTkj"
 #define API_SECRET  "xSRXGphmCZK6GmSBdD9rkGLQzgd3pNvVQGsBWLgx7Z7GhSf8xGggLchNSNBbfZ9j"
 
-#define LOGOUT_TIMER (10 * 60 * 1000)
+std::string consumer_key = "Vbq5JHJfC8sBrMRdKPqb7GDs9p8RSTkj";
+std::string consumer_secret = "xSRXGphmCZK6GmSBdD9rkGLQzgd3pNvVQGsBWLgx7Z7GhSf8xGggLchNSNBbfZ9j";
+std::string request_token_url = "https://api.smugmug.com/services/oauth/1.0a/getRequestToken";
+std::string request_token_query_args = "oauth_callback=oob";
+std::string authorize_url = "https://api.smugmug.com/services/oauth/1.0a/authorize";
+std::string access_token_url = "https://api.smugmug.com/services/oauth/1.0a/getAccessToken";
 
 //==============================================================================
 class FileItem : public TreeViewItem
@@ -369,6 +374,19 @@ private:
 	UploadRequest* ur;
 };
 
+String getPin()
+{
+    AlertWindow aw ("Komodo Drop", "Authorization:", AlertWindow::InfoIcon);
+    aw.addTextEditor ("code", "", "Code:");
+    aw.addButton ("ok", 1);
+    aw.addButton ("cancel", 2);
+    
+    if (aw.runModalLoop() == 1 && aw.getTextEditorContents ("code").isNotEmpty())
+        return aw.getTextEditorContents ("code");
+    
+    return {};
+}
+
 //==============================================================================
 String Album::getDisplayTitle()
 {
@@ -394,137 +412,52 @@ SmugMug::SmugMug()
 
 void SmugMug::authorizeIfNeeded()
 {
-    auto requestToken = getRequestToken();
-    if (requestToken.size() > 0)
-    {
-        launchAuthorizeUrl (requestToken);
-        
-        AlertWindow aw ("Komodo Drop", "Authorization:", AlertWindow::InfoIcon);
-        aw.addTextEditor ("code", "", "Code:");
-        aw.addButton ("ok", 1);
-        aw.addButton ("cancel", 2);
-        
-        if (aw.runModalLoop() == 1 && aw.getTextEditorContents ("code").isNotEmpty())
-        {
-            auto id = aw.getTextEditorContents ("code");
-            
-            getAccessToken (requestToken, id);
-        }
-    }
-}
+    auto& settings = *Settings::getInstance();
+    if (settings.accessToken.isNotEmpty())
+        return;
+    
+    OAuth::Consumer consumer (consumer_key, consumer_secret);
+    OAuth::Client oauth (&consumer);
+    
+    std::string base_request_token_url = request_token_url + (request_token_query_args.empty() ? std::string ("") : (std::string ("?") + request_token_query_args));
+    std::string oAuthQueryString = oauth.getURLQueryString (OAuth::Http::Get, base_request_token_url);
+    
+    std::string url1 = request_token_url + "?" + oAuthQueryString;
+    auto rsp1 = URL (url1.c_str()).readEntireTextStream();
+    
+    OAuth::Token request_token = OAuth::Token::extract (rsp1.toStdString());
+    
+    std::string url2 = authorize_url + "?oauth_token=" + request_token.key();
+    URL (url2.c_str()).launchInDefaultBrowser();
+    
+    std::string pin = getPin().toStdString();
+    request_token.setPin (pin);
+    
+    oauth = OAuth::Client (&consumer, &request_token);
 
-void SmugMug::launchAuthorizeUrl (const StringPairArray& requestToken)
-{
-    StringPairArray params;
-    params.set ("oauth_consumer_key", API_KEY);
-    params.set ("oauth_nonce", Uuid().toString());
-    params.set ("oauth_signature_method", "PLAINTEXT");
-    params.set ("oauth_timestamp", String (Time::currentTimeMillis() / 1000));
-    params.set ("oauth_token", requestToken["oauth_token"]);
-    params.set ("access", "Full");
-    params.set ("permissions", "Modify");
-    params.set ("oauth_callback", "oob");
-    params.set ("oauth_signature", String (API_SECRET) + "&");
+    oAuthQueryString = oauth.getURLQueryString (OAuth::Http::Get, access_token_url, std::string( "" ), true);
+    std::string url3 = access_token_url + "?" + oAuthQueryString;
     
-    URL url ("https://api.smugmug.com/services/oauth/1.0a/authorize");
-    
-    StringArray keys = params.getAllKeys();
-    StringArray vals = params.getAllValues();
-    
-    for (int i = 0; i < keys.size(); i++)
-        url = url.withParameter (keys[i], vals[i]);
+    auto access_token_resp = URL (url3.c_str()).readEntireTextStream();
 
-    url.launchInDefaultBrowser();
-}
-
-StringPairArray SmugMug::getRequestToken()
-{
-    StringPairArray params;
-    params.set ("oauth_consumer_key", API_KEY);
-    params.set ("oauth_nonce", Uuid().toString());
-    params.set ("oauth_signature_method", "PLAINTEXT");
-    params.set ("oauth_timestamp", String (Time::currentTimeMillis() / 1000));
-    params.set ("oauth_callback", "oob");
-    params.set ("oauth_signature", String (API_SECRET) + "&");
+    OAuth::KeyValuePairs access_token_resp_data = OAuth::ParseKeyValuePairs(access_token_resp.toStdString());
+    OAuth::Token access_token = OAuth::Token::extract (access_token_resp_data);
     
-    URL url ("https://api.smugmug.com/services/oauth/1.0a/getRequestToken");
-    
-    StringArray keys = params.getAllKeys();
-    StringArray vals = params.getAllValues();
-    
-    for (int i = 0; i < keys.size(); i++)
-        url = url.withParameter (keys[i], vals[i]);
-    
-    auto x = url.readEntireTextStream();
-    DBG(x);
-
-    StringPairArray res;
-    auto tokens = StringArray::fromTokens(x, "&", "");
-    for (auto t : tokens)
-    {
-        auto v = StringArray::fromTokens(t, "=", "");
-        res.set (v[0], v[1]);
-    }
-
-    return res;
-}
-
-StringPairArray SmugMug::getAccessToken (const StringPairArray& requestToken, const String& code)
-{
-    StringPairArray params;
-    params.set ("oauth_consumer_key", API_KEY);
-    params.set ("oauth_nonce", Uuid().toString());
-    params.set ("oauth_signature_method", "PLAINTEXT");
-    params.set ("oauth_timestamp", String (Time::currentTimeMillis() / 1000));
-    params.set ("oauth_verifier", code);
-    params.set ("oauth_token", requestToken["oauth_token"]);
-    params.set ("oauth_token_secret", requestToken["oauth_token_secret"]);
-    params.set ("oauth_signature", String (API_SECRET) + "&");
-    
-    URL url ("https://api.smugmug.com/services/oauth/1.0a/getAccessToken");
-    
-    StringArray keys = params.getAllKeys();
-    StringArray vals = params.getAllValues();
-    
-    for (int i = 0; i < keys.size(); i++)
-        url = url.withParameter (keys[i], vals[i]);
-    
-    auto x = url.readEntireTextStream();
-    
-    DBG (url.toString (true));
-    DBG (x);
+    settings.accessToken = access_token.key().c_str();
+    settings.accessSecret = access_token.secret().c_str();
+    settings.save();
 }
 
 SmugMug::~SmugMug()
 {
-	if (sessionId.isNotEmpty())
-		logout();
 }
 
-void SmugMug::login(const String& username, const String& password)
+void SmugMug::login()
 {
-	sessionId = "";
-
-	StringPairArray params;
-	params.set(("EmailAddress"), username);
-	params.set(("Password"), password);
-
-	auto n = smugMugRequest (("smugmug.login.withPassword"), params);
-	
-	if (n)
-	{
-		XmlElement* l = n->getChildByName (("Login"));
-		if (l)
-		{
-			accountType = l->getStringAttribute (("AccountType"));
-			XmlElement* s = l->getChildByName (("Session"));
-			if (s)
-			{
-				sessionId = s->getStringAttribute(("id"));
-				addLogEntry (("Info: logged in session: ") + sessionId);
-			}
-		}
-	}
+    auto& s = *Settings::getInstance();
+    s.accessSecret = {};
+    s.accessToken  = {};
+    authorizeIfNeeded();
 }
 
 bool SmugMug::isPower()
@@ -539,17 +472,15 @@ bool SmugMug::isPro()
 
 bool SmugMug::isLoggedIn()
 {
-	return sessionId.isNotEmpty();
+    return Settings::getInstance()->accessToken.isNotEmpty();
 }
 
 void SmugMug::logout()
 {
-	StringPairArray params;
-	auto n = smugMugRequest (("smugmug.logout"), params);
-
-	addLogEntry (("Info: logged out session ") + sessionId);
-
-	sessionId = "";
+    auto& s = *Settings::getInstance();
+    s.accessSecret = {};
+    s.accessToken  = {};
+    s.save();
 }
 
 bool SmugMug::getNumberOfViews(int month, int year, OwnedArray<Views>& albums, OwnedArray<Views>& images)
@@ -928,8 +859,6 @@ std::unique_ptr<XmlElement> SmugMug::smugMugRequest(const String& method, const 
 	params.set(("method"), method);
 	params.set(("APIKey"), API_KEY);
 
-	startTimer(LOGOUT_TIMER);
-
 	if (sessionId.isNotEmpty())
 		params.set (("SessionID"), sessionId);
 
@@ -997,8 +926,6 @@ SmugID SmugMug::uploadFile (int queue, int index)
 
 	Time start = Time::getCurrentTime();
 
-	startTimer (LOGOUT_TIMER);
-
 	String headers;
     String filename = uf.file.getFileName();
     headers = "PUT http://upload.smugmug.com/" + URL::addEscapeChars(filename, false) + " HTTP/1.1\r\n" +
@@ -1035,8 +962,6 @@ SmugID SmugMug::uploadFile (int queue, int index)
 			{
 				int in = fos->read (buffer, sizeof (buffer));
 				int out = soc.write (buffer, in);
-
-				startTimer (LOGOUT_TIMER);
 
 				if (in != out)
 				{

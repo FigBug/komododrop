@@ -33,52 +33,6 @@ SettingsComponent::SettingsComponent ()
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
 
-    label2.reset (new Label ("label2",
-                             TRANS("password:")));
-    addAndMakeVisible (label2.get());
-    label2->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
-    label2->setJustificationType (Justification::centredLeft);
-    label2->setEditable (false, false, false);
-    label2->setColour (TextEditor::textColourId, Colours::black);
-    label2->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
-
-    label2->setBounds (16, 48, 104, 24);
-
-    label1.reset (new Label ("label1",
-                             TRANS("email address:")));
-    addAndMakeVisible (label1.get());
-    label1->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
-    label1->setJustificationType (Justification::centredLeft);
-    label1->setEditable (false, false, false);
-    label1->setColour (TextEditor::textColourId, Colours::black);
-    label1->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
-
-    label1->setBounds (16, 16, 104, 24);
-
-    email.reset (new TextEditor ("email"));
-    addAndMakeVisible (email.get());
-    email->setMultiLine (false);
-    email->setReturnKeyStartsNewLine (false);
-    email->setReadOnly (false);
-    email->setScrollbarsShown (true);
-    email->setCaretVisible (true);
-    email->setPopupMenuEnabled (true);
-    email->setText (String());
-
-    email->setBounds (128, 16, 200, 24);
-
-    password.reset (new TextEditor ("password"));
-    addAndMakeVisible (password.get());
-    password->setMultiLine (false);
-    password->setReturnKeyStartsNewLine (false);
-    password->setReadOnly (false);
-    password->setScrollbarsShown (true);
-    password->setCaretVisible (true);
-    password->setPopupMenuEnabled (true);
-    password->setText (String());
-
-    password->setBounds (128, 48, 200, 24);
-
     cancel.reset (new TextButton ("cancel"));
     addAndMakeVisible (cancel.get());
     cancel->addListener (this);
@@ -125,6 +79,13 @@ SettingsComponent::SettingsComponent ()
 
     label->setBounds (64, 128, 112, 24);
 
+    auth.reset (new TextButton ("auth"));
+    addAndMakeVisible (auth.get());
+    auth->setButtonText (TRANS("authorize Smugmug"));
+    auth->addListener (this);
+
+    auth->setBounds (104, 32, 150, 24);
+
 
     //[UserPreSize]
     //[/UserPreSize]
@@ -134,8 +95,6 @@ SettingsComponent::SettingsComponent ()
 
     //[Constructor] You can add your own custom stuff here..
 	Settings* settings = Settings::getInstance();
-	password->setText(settings->password);
-	email->setText(settings->email);
 	silentUploads->setToggleState(settings->silentUpload, dontSendNotification);
 	duplicate->setToggleState(settings->checkForDupes, dontSendNotification);
 	threads->setValue(settings->uploadThreads);
@@ -148,16 +107,13 @@ SettingsComponent::~SettingsComponent()
     //[Destructor_pre]. You can add your own custom destruction code here..
     //[/Destructor_pre]
 
-    label2 = nullptr;
-    label1 = nullptr;
-    email = nullptr;
-    password = nullptr;
     cancel = nullptr;
     ok = nullptr;
     silentUploads = nullptr;
     duplicate = nullptr;
     threads = nullptr;
     label = nullptr;
+    auth = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -198,8 +154,6 @@ void SettingsComponent::buttonClicked (Button* buttonThatWasClicked)
     {
         //[UserButtonCode_ok] -- add your button handler code here..
 		Settings* settings = Settings::getInstance();
-		settings->password = password->getText();
-		settings->email    = email->getText();
 		settings->silentUpload = silentUploads->getToggleState();
 		settings->checkForDupes = duplicate->getToggleState();
 		settings->uploadThreads = roundToInt(threads->getValue());
@@ -216,6 +170,11 @@ void SettingsComponent::buttonClicked (Button* buttonThatWasClicked)
     {
         //[UserButtonCode_duplicate] -- add your button handler code here..
         //[/UserButtonCode_duplicate]
+    }
+    else if (buttonThatWasClicked == auth.get())
+    {
+        //[UserButtonCode_auth] -- add your button handler code here..
+        //[/UserButtonCode_auth]
     }
 
     //[UserbuttonClicked_Post]
@@ -257,22 +216,6 @@ BEGIN_JUCER_METADATA
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="1" initialWidth="350" initialHeight="200">
   <BACKGROUND backgroundColour="ffffff"/>
-  <LABEL name="label2" id="ec6c668c4d0b411d" memberName="label2" virtualName=""
-         explicitFocusOrder="0" pos="16 48 104 24" edTextCol="ff000000"
-         edBkgCol="0" labelText="password:" editableSingleClick="0" editableDoubleClick="0"
-         focusDiscardsChanges="0" fontname="Default font" fontsize="1.5e1"
-         kerning="0" bold="0" italic="0" justification="33"/>
-  <LABEL name="label1" id="75f19df5ed823858" memberName="label1" virtualName=""
-         explicitFocusOrder="0" pos="16 16 104 24" edTextCol="ff000000"
-         edBkgCol="0" labelText="email address:" editableSingleClick="0"
-         editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
-         fontsize="1.5e1" kerning="0" bold="0" italic="0" justification="33"/>
-  <TEXTEDITOR name="email" id="a9220190b5eb5b13" memberName="email" virtualName=""
-              explicitFocusOrder="0" pos="128 16 200 24" initialText="" multiline="0"
-              retKeyStartsLine="0" readonly="0" scrollbars="1" caret="1" popupmenu="1"/>
-  <TEXTEDITOR name="password" id="a508254e81adf08a" memberName="password" virtualName=""
-              explicitFocusOrder="0" pos="128 48 200 24" initialText="" multiline="0"
-              retKeyStartsLine="0" readonly="0" scrollbars="1" caret="1" popupmenu="1"/>
   <TEXTBUTTON name="cancel" id="b302b81768bcf84f" memberName="cancel" virtualName=""
               explicitFocusOrder="0" pos="256 168 80 24" buttonText="cancel"
               connectedEdges="0" needsCallback="1" radioGroupId="0"/>
@@ -294,6 +237,9 @@ BEGIN_JUCER_METADATA
          edBkgCol="0" labelText="upload threads:" editableSingleClick="0"
          editableDoubleClick="0" focusDiscardsChanges="0" fontname="Default font"
          fontsize="1.5e1" kerning="0" bold="0" italic="0" justification="33"/>
+  <TEXTBUTTON name="auth" id="3a9656f4c2a33c38" memberName="auth" virtualName=""
+              explicitFocusOrder="0" pos="104 32 150 24" buttonText="authorize Smugmug"
+              connectedEdges="0" needsCallback="1" radioGroupId="0"/>
 </JUCER_COMPONENT>
 
 END_JUCER_METADATA

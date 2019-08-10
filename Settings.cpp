@@ -37,8 +37,8 @@ Settings::Settings()
 
 	props = new PropertiesFile(opts);
 
-	password        = props->getValue("password");
-	email           = props->getValue("email");
+	accessToken     = props->getValue("accessToken");
+	accessSecret    = props->getValue("accessSecret");
 	silentUpload    = props->getBoolValue("silentUpload");
 	lastCateory		= props->getIntValue("lastCategory", -1);
 	lastSubCategory = props->getIntValue("lastSubCategory", -1);
@@ -77,8 +77,8 @@ Settings::~Settings()
 
 void Settings::save()
 {
-	props->setValue("password", password);
-	props->setValue("email", email);
+	props->setValue("accessSecret", accessSecret);
+	props->setValue("accessToken", accessToken);
 	props->setValue("silentUpload", silentUpload);
 	props->setValue("lastCategory", lastCateory);
 	props->setValue("lastSubCategory", lastSubCategory);
