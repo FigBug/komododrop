@@ -74,13 +74,37 @@ juce_add_gui_app(KomodoDrop
 juce_generate_juce_header(KomodoDrop)
 
 target_sources(KomodoDrop PRIVATE
-    App.cpp
-    AsyncDialogs.cpp
-    Settings.cpp
-    SettingsComponent.cpp
-    Smugmug.cpp
-    UploadComponent.cpp
-    UploadWindow.cpp)
+    Source/App.cpp
+    Source/AsyncDialogs.cpp
+    Source/Settings.cpp
+    Source/SettingsComponent.cpp
+    Source/Smugmug.cpp
+    Source/UploadComponent.cpp
+    Source/UploadWindow.cpp)
+
+# Keeps the headers visible in IDE project trees alongside their .cpp files.
+target_sources(KomodoDrop PRIVATE
+    Source/AsyncDialogs.h
+    Source/Settings.h
+    Source/SettingsComponent.h
+    Source/Smugmug.h
+    Source/UploadComponent.h
+    Source/UploadWindow.h)
+
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/Source" PREFIX "Source" FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/App.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/AsyncDialogs.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/AsyncDialogs.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/Settings.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/Settings.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/SettingsComponent.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/SettingsComponent.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/Smugmug.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/Smugmug.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/UploadComponent.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/UploadComponent.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/UploadWindow.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Source/UploadWindow.h)
 
 target_compile_definitions(KomodoDrop PRIVATE
     JUCE_WEB_BROWSER=0
