@@ -11,9 +11,20 @@ class SmugID
 public:
     SmugID() = default;
 
+	/** A stable synthetic id derived from `uri`. API v2 has no integer ids, but the
+	    UI uses ints for ComboBox entries and Settings persists them between runs,
+	    so this is a hash of the uri rather than an index. -1 means "not set".
+	*/
 	int id = -1;
-	String key;
+	String key;     // v2 AlbumKey / ImageKey
+	String uri;     // v2 object uri, e.g. /api/v2/album/XXXXX
 };
+
+/** Derives the stable synthetic id used throughout the UI from a v2 uri. Always
+    returns a positive value so that `id + 1` can never collide with a ComboBox
+    id of 0 ("nothing selected") or 1 (the "<none>" sub category entry).
+*/
+int smugIdForUri (const String& uri);
 
 //==============================================================================
 class UploadFile
@@ -238,16 +249,65 @@ private:
 
     void authorize (std::function<void (bool)> callback);
     void finishAuthorize (bool success);
-    StringPairArray getRequestToken();
-    StringPairArray getAccessToken (const StringPairArray& requestToken);
-    
 	SmugID uploadFile (int queue, int index);
-    std::unique_ptr<XmlElement> smugMugRequest (const String& method, const StringPairArray& params, bool upload = false);
+
+	/** Performs an OAuth-signed API v2 request. `path` is everything after the
+	    host, e.g. "/api/v2!authuser". `body`, when not void, is sent as JSON.
+	    Returns the payload's "Response" object, or a void var on failure.
+	*/
+	var v2Request (const String& httpMethod, const String& path, const var& body = var());
+
+	/** Reads the signed-in user's nickname, root folder and plan. Cached after the
+	    first successful call. */
+	bool fetchAuthUser();
+
+	/** A folder in the user's tree. The app's "categories" are the folders directly
+	    under the root node and its "sub categories" are one level below those —
+	    v2 has no categories, just a folder tree.
+	*/
+	struct Folder
+	{
+		int id = -1;
+		int parentId = -1;
+		String name;
+		String uri;      // /api/v2/folder/user/<nick>/<path>
+		String nodeUri;  // /api/v2/node/<id>
+	};
+
+	/** An album found while walking the folder tree, with the folder it lives in.
+	    Taking the parent from the walk itself avoids having to infer it from the
+	    album object's own uris.
+	*/
+	struct AlbumNode
+	{
+		SmugID id;
+		String name;
+		int parentFolderId = -1;
+	};
+
+	/** Re-reads the folder tree, two levels deep (all the UI models), collecting
+	    the albums in it as it goes. */
+	bool refreshFolders();
+	const Folder* folderForId (int id) const;
+
+	/** Lists the child nodes of a node uri, following pagination. */
+	bool listChildNodes (const String& nodeUri, Array<var>& nodes);
+
+	/** POSTs a new child folder or album under `parentFolderUri`. */
+	var createNode (const String& parentFolderUri, const String& type,
+	                const String& name, const var& extraFields);
+
 	void addLogEntry (const String& message);
-	String sessionId;
-	String accountType;
 
 	bool getNextFileToDo (int& queue, int& index);
+
+	String nickName;
+	String rootFolderUri;
+	String rootNodeUri;
+	String plan;
+
+	Array<Folder> folders;
+	Array<AlbumNode> albumNodes;
 
 	CriticalSection lock;
 	OwnedArray<UploadRequest> uploadQueue;

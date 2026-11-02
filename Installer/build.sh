@@ -230,7 +230,10 @@ else
     ISCC="/c/Program Files/Inno Setup 6/ISCC.exe"
   fi
 
-  "$ISCC" "/DMyAppVersion=$VERSION" "$PROJECT_ROOT/Installer/win/KomodoDrop.iss"
+  # ISCC is a native Windows binary, so an MSYS path like /d/a/... is parsed as a
+  # switch rather than a filename. Run it from the script's own directory and pass
+  # a bare relative name.
+  ( cd "$PROJECT_ROOT/Installer/win" && "$ISCC" "/DMyAppVersion=$VERSION" "KomodoDrop.iss" )
 
   EXE_OUT="$STAGE/${APP_NAME}.exe"
 

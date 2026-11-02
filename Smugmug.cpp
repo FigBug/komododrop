@@ -2,11 +2,8 @@
 #include "Settings.h"
 #include <liboauthcpp/liboauthcpp.h>
 
-#define BASE_URL    "https://api.smugmug.com/services/api/rest/1.3.0/"
-#define UPLOAD_URL  "https://upload.smugmug.com/services/api/rest/1.3.0/"
-#define API_KEY     "Vbq5JHJfC8sBrMRdKPqb7GDs9p8RSTkj"
-#define API_SECRET  "xSRXGphmCZK6GmSBdD9rkGLQzgd3pNvVQGsBWLgx7Z7GhSf8xGggLchNSNBbfZ9j"
-
+#define API_BASE    "https://api.smugmug.com"
+#define UPLOAD_HOST "upload.smugmug.com"
 std::string consumer_key = "Vbq5JHJfC8sBrMRdKPqb7GDs9p8RSTkj";
 std::string consumer_secret = "xSRXGphmCZK6GmSBdD9rkGLQzgd3pNvVQGsBWLgx7Z7GhSf8xGggLchNSNBbfZ9j";
 std::string request_token_url = "https://api.smugmug.com/services/oauth/1.0a/getRequestToken";
@@ -410,9 +407,9 @@ String Album::getDisplayTitle()
 //==============================================================================
 SmugMug::SmugMug()
 {
-    // Kick the authorization off now; it completes on the message thread once the
-    // user has pasted the verifier code.
-    authorize (nullptr);
+    // Only authorizes if we don't already have a stored token; completes on the
+    // message thread once the user has pasted the verifier code.
+    ensureLoggedIn (nullptr);
 }
 
 void SmugMug::ensureLoggedIn (std::function<void (bool)> callback)
@@ -454,7 +451,7 @@ void SmugMug::authorize (std::function<void (bool)> callback)
 
     OAuth::Token request_token = OAuth::Token::extract (rsp1.toStdString());
 
-    std::string url2 = authorize_url + "?oauth_token=" + request_token.key() + "&Access='Full'&Permissions='Modify'";
+    std::string url2 = authorize_url + "?oauth_token=" + request_token.key() + "&Access=Full&Permissions=Modify";
     URL (url2.c_str()).launchInDefaultBrowser();
 
     // The user now has to copy the verifier code out of the browser, so the rest of
@@ -507,14 +504,291 @@ SmugMug::~SmugMug()
 
 
 
+//==============================================================================
+// API v2 plumbing.
+//
+// The 1.3.0 REST API this app was written against has been retired, so every
+// call below goes through api.smugmug.com/api/v2 instead: JSON rather than XML,
+// OAuth in an Authorization header rather than query parameters, and a folder
+// tree rather than categories and sub categories.
+
+// Uris in a v2 response are objects carrying a "Uri" field at the default
+// verbosity, and bare strings at _verbosity=1. Accept either.
+static String uriOf (const var& v)
+{
+    if (v.isObject())
+        return v["Uri"].toString();
+
+    return v.toString();
+}
+
+int smugIdForUri (const String& uri)
+{
+    if (uri.isEmpty())
+        return -1;
+
+    // Must stay stable between runs: Settings persists these as lastAlbum /
+    // lastCategory / lastSubCategory. Keep it positive so that `id + 1` can't
+    // collide with a ComboBox id of 0 or the "<none>" entry's 1.
+    auto h = uri.hashCode() & 0x7fffffff;
+
+    return h <= 1 ? 2 : h;
+}
+
+// v2 requires UrlName to be url-safe and to start with an upper case letter.
+static String urlNameFor (const String& name)
+{
+    String out;
+
+    for (auto c : name)
+    {
+        if (CharacterFunctions::isLetterOrDigit (c) || c == '-' || c == '_')
+            out << c;
+        else if (out.isNotEmpty() && ! out.endsWithChar ('-'))
+            out << '-';
+    }
+
+    out = out.trimCharactersAtEnd ("-_");
+
+    if (out.isEmpty())
+        return "Untitled";
+
+    if (CharacterFunctions::isLetter (out[0]))
+        return out.substring (0, 1).toUpperCase() + out.substring (1);
+
+    return "N" + out;
+}
+
+var SmugMug::v2Request (const String& httpMethod, const String& path, const var& body)
+{
+    auto& s = *Settings::getInstance();
+
+    if (s.accessToken.isEmpty())
+        return {};
+
+    const String url = String (API_BASE) + path;
+
+    auto type = OAuth::Http::Get;
+
+    if      (httpMethod == "POST")   type = OAuth::Http::Post;
+    else if (httpMethod == "DELETE") type = OAuth::Http::Delete;
+    else if (httpMethod == "PUT")    type = OAuth::Http::Put;
+
+    String headers;
+
+    try
+    {
+        OAuth::Consumer consumer (consumer_key, consumer_secret);
+        OAuth::Token token (s.accessToken.toStdString(), s.accessSecret.toStdString());
+        OAuth::Client oauth (&consumer, &token);
+
+        // A JSON body isn't form encoded, so it is deliberately left out of the
+        // signature base string -- only the method and url are signed.
+        headers = String (oauth.getFormattedHttpHeader (type, url.toStdString()).c_str());
+    }
+    catch (const std::exception& e)
+    {
+        addLogEntry (String ("Error: could not sign request: ") + e.what());
+        return {};
+    }
+
+    headers = headers.trimEnd() + "\r\nAccept: application/json";
+
+    URL u (url);
+
+    if (! body.isVoid())
+    {
+        u = u.withPOSTData (JSON::toString (body));
+        headers += "\r\nContent-Type: application/json";
+    }
+
+    int status = 0;
+
+    auto stream = u.createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)
+                                           .withExtraHeaders (headers)
+                                           .withHttpRequestCmd (httpMethod)
+                                           .withConnectionTimeoutMs (30000)
+                                           .withStatusCode (&status));
+
+    if (stream == nullptr)
+    {
+        addLogEntry ("Error: unable to connect to Smugmug.");
+        return {};
+    }
+
+    auto text = stream->readEntireStreamAsString();
+
+    if (status < 200 || status >= 300)
+    {
+        auto message = JSON::parse (text)["Message"].toString();
+
+        addLogEntry ("Error: " + httpMethod + " " + path + " failed (HTTP " + String (status) + ")"
+                     + (message.isNotEmpty() ? ": " + message : String()));
+        return {};
+    }
+
+    return JSON::parse (text)["Response"];
+}
+
+bool SmugMug::fetchAuthUser()
+{
+    if (nickName.isNotEmpty())
+        return true;
+
+    auto user = v2Request ("GET", "/api/v2!authuser")["User"];
+
+    if (! user.isObject())
+        return false;
+
+    nickName = user["NickName"].toString();
+    plan     = user["Plan"].toString();
+
+    auto uris = user["Uris"];
+    rootNodeUri   = uriOf (uris["Node"]);
+    rootFolderUri = uriOf (uris["Folder"]);
+
+    if (rootFolderUri.isEmpty() && nickName.isNotEmpty())
+        rootFolderUri = "/api/v2/folder/user/" + nickName;
+
+    return nickName.isNotEmpty();
+}
+
+bool SmugMug::listChildNodes (const String& nodeUri, Array<var>& nodes)
+{
+    if (nodeUri.isEmpty())
+        return false;
+
+    const int pageSize = 100;
+
+    for (int start = 1;;)
+    {
+        auto response = v2Request ("GET", nodeUri + "!children?start=" + String (start)
+                                                  + "&count=" + String (pageSize));
+
+        if (! response.isObject())
+            return false;
+
+        auto node = response["Node"];
+
+        if (auto* array = node.getArray())
+        {
+            for (auto& n : *array)
+                nodes.add (n);
+        }
+        else if (node.isObject())
+        {
+            nodes.add (node);
+        }
+
+        // Pages.NextPage is simply absent on the last page.
+        if (uriOf (response["Pages"]["NextPage"]).isEmpty())
+            return true;
+
+        start += pageSize;
+    }
+}
+
+bool SmugMug::refreshFolders()
+{
+    if (! fetchAuthUser())
+        return false;
+
+    folders.clearQuick();
+    albumNodes.clearQuick();
+
+    auto addChildrenOf = [this] (const String& parentNodeUri, int parentId)
+    {
+        Array<var> children;
+
+        if (! listChildNodes (parentNodeUri, children))
+            return;
+
+        for (auto& n : children)
+        {
+            auto type = n["Type"].toString();
+
+            if (type == "Folder")
+            {
+                Folder f;
+                f.name     = n["Name"].toString();
+                f.nodeUri  = uriOf (n["Uri"]);
+                // A folder node exposes its folder object as either Folder or
+                // FolderByID depending on how the node was reached.
+                f.uri      = uriOf (n["Uris"]["Folder"]);
+
+                if (f.uri.isEmpty())
+                    f.uri = uriOf (n["Uris"]["FolderByID"]);
+
+                f.id       = smugIdForUri (f.nodeUri);
+                f.parentId = parentId;
+
+                if (f.uri.isNotEmpty() && f.id != -1)
+                    folders.add (f);
+            }
+            else if (type == "Album")
+            {
+                AlbumNode a;
+                a.name           = n["Name"].toString();
+                a.id.uri         = uriOf (n["Uris"]["Album"]);
+                a.id.key         = a.id.uri.fromLastOccurrenceOf ("/", false, false);
+                a.id.id          = smugIdForUri (a.id.uri);
+                a.parentFolderId = parentId;
+
+                if (a.id.uri.isNotEmpty())
+                    albumNodes.add (a);
+            }
+        }
+    };
+
+    addChildrenOf (rootNodeUri, -1);
+
+    // Snapshot the top level before adding to `folders`, so the loop isn't
+    // walking an array that's being appended to.
+    const Array<Folder> topLevel (folders);
+
+    for (auto& top : topLevel)
+        addChildrenOf (top.nodeUri, top.id);
+
+    return true;
+}
+
+const SmugMug::Folder* SmugMug::folderForId (int id) const
+{
+    for (auto& f : folders)
+        if (f.id == id)
+            return &f;
+
+    return nullptr;
+}
+
+var SmugMug::createNode (const String& parentFolderUri, const String& type,
+                         const String& name, const var& extraFields)
+{
+    if (parentFolderUri.isEmpty() || name.isEmpty())
+        return {};
+
+    auto* fields = new DynamicObject();
+    fields->setProperty ("Name", name);
+    fields->setProperty ("UrlName", urlNameFor (name));
+
+    if (auto* extra = extraFields.getDynamicObject())
+        for (auto& prop : extra->getProperties())
+            fields->setProperty (prop.name, prop.value);
+
+    const String endpoint = (type == "Album") ? "!albums" : "!folders";
+
+    return v2Request ("POST", parentFolderUri + endpoint, var (fields));
+}
+
+//==============================================================================
 bool SmugMug::isPower()
 {
-	return accountType == "Power" || isPro();
+    return plan.containsIgnoreCase ("Power") || isPro();
 }
 
 bool SmugMug::isPro()
 {
-	return accountType == "Pro";
+    return plan.containsIgnoreCase ("Pro") || plan.containsIgnoreCase ("Portfolio");
 }
 
 bool SmugMug::isLoggedIn()
@@ -528,415 +802,363 @@ void SmugMug::logout()
     s.accessSecret = {};
     s.accessToken  = {};
     s.save();
+
+    nickName      = {};
+    rootFolderUri = {};
+    rootNodeUri   = {};
+    plan          = {};
+    folders.clearQuick();
 }
 
-bool SmugMug::getNumberOfViews(int month, int year, OwnedArray<Views>& albums, OwnedArray<Views>& images)
+bool SmugMug::getNumberOfViews (int, int, OwnedArray<Views>&, OwnedArray<Views>&)
 {
-	StringPairArray params;
-	params.set(("Month"), String(month));
-	params.set(("Year"), String(year));
-	auto n = smugMugRequest(("smugmug.users.getTransferStats"), params);
-
-	if (n)
-	{
-		XmlElement* albs = n->getChildByName(("Albums"));
-		if (albs)
-		{
-			XmlElement* alb = albs->getChildByName(("Album"));
-			while (alb)
-			{
-				Views* v = new Views();
-				v->id    = alb->getIntAttribute(("id"));
-				v->views = alb->getIntAttribute(("Tiny")) + alb->getIntAttribute(("Small")) + alb->getIntAttribute(("Medium")) + alb->getIntAttribute(("Large")) + roundToInt(alb->getDoubleAttribute(("Original")));
-
-				albums.add(v);
-
-				XmlElement* img = n->getChildByName(("Image"));
-				while (img)
-				{
-					Views* v = new Views();
-					v->id    = img->getIntAttribute(("id"));
-					v->views = img->getIntAttribute(("Tiny")) + img->getIntAttribute(("Small")) + img->getIntAttribute(("Medium")) + img->getIntAttribute(("Large")) + roundToInt(img->getDoubleAttribute(("Original")));
-
-					img = img->getNextElementWithTagName(("Image"));
-				}
-
-				alb = alb->getNextElementWithTagName(("Album"));
-			}
-		}
-		return true;
-	}
-	return false;
+    // The 1.3.0 getTransferStats call has no direct v2 equivalent, and the only
+    // caller is the debug-only "Show top photos" menu item.
+    addLogEntry ("Info: transfer stats are not available in the SmugMug v2 API");
+    return false;
 }
 
-bool SmugMug::getImageUrls(SmugID id, ImageUrls& urls)
+bool SmugMug::getImageUrls (SmugID id, ImageUrls& urls)
 {
-	StringPairArray params;
-	params.set(("ImageID"), String(id.id));
-	params.set(("ImageKey"), id.key);
-	params.set(("Password"), "");
-	auto n = smugMugRequest(("smugmug.images.getURLs"), params);
+    if (id.uri.isEmpty())
+        return false;
 
-	if (n)
-	{
-		XmlElement* img = n->getChildByName(("Image"));
+    auto sizes = v2Request ("GET", id.uri + "!sizes")["ImageSizes"];
 
-		if (img)
-		{
-			urls.originalURL = img->getStringAttribute(("OriginalURL"));
-			urls.largeURL    = img->getStringAttribute(("LargeURL"));
-			urls.mediumURL   = img->getStringAttribute(("MediumURL"));
-			urls.smallURL    = img->getStringAttribute(("SmallURL"));
-			urls.tinyURL     = img->getStringAttribute(("TinyURL"));
-			urls.thumbURL    = img->getStringAttribute(("ThumbURL"));
-			urls.albumURL    = img->getStringAttribute(("AlbumURL"));
-		}
-	
-		return true;
-	}
-	return false;
+    if (! sizes.isObject())
+        return false;
+
+    urls.originalURL = sizes["OriginalImageUrl"].toString();
+    urls.largeURL    = sizes["LargeImageUrl"].toString();
+    urls.mediumURL   = sizes["MediumImageUrl"].toString();
+    urls.smallURL    = sizes["SmallImageUrl"].toString();
+    urls.tinyURL     = sizes["TinyImageUrl"].toString();
+    urls.thumbURL    = sizes["ThumbImageUrl"].toString();
+
+    return true;
 }
 
-bool SmugMug::getImages(OwnedArray<ImageItem>& images, SmugID albumId)
+bool SmugMug::getImages (OwnedArray<ImageItem>& images, SmugID albumId)
 {
-	StringPairArray params;
-	params.set(("AlbumID"), String(albumId.id));
-	params.set(("AlbumKey"), albumId.key);
-	params.set(("Heavy"), ("1"));
-	auto n = smugMugRequest(("smugmug.images.get"), params);
+    if (albumId.uri.isEmpty())
+        return false;
 
-	if (n)
-	{
-		XmlElement* a = n->getChildByName(("Album"));
-		if (a)
-		{
-			XmlElement* i = a->getChildByName(("Images"));
-			if (i)
-			{
-				XmlElement* img = i->getChildByName(("Image"));
-				while (img)
-				{
-					ImageItem* itm = new ImageItem();
+    const int pageSize = 100;
 
-					itm->id.id			= img->getIntAttribute(("id"));
-					itm->id.key			= img->getStringAttribute(("Key"));
-					itm->filename		= img->getStringAttribute(("FileName"));
-					itm->caption		= img->getStringAttribute((""));
-					itm->keywords		= img->getStringAttribute((""));
-					itm->position		= img->getIntAttribute(("Position"));
-					itm->date			= img->getStringAttribute(("Date"));
-					itm->format			= img->getStringAttribute(("Format"));
-					itm->serial			= img->getIntAttribute(("Serial"));
-					itm->watermark		= img->getBoolAttribute(("Watermark"));
-					itm->size			= img->getIntAttribute(("Size"));
-					itm->width			= img->getIntAttribute(("Width"));
-					itm->height			= img->getIntAttribute(("Height"));
-					itm->md5sum			= img->getStringAttribute(("MD5Sum"));
-					itm->lastUpdated	= img->getStringAttribute(("LastUpdated"));
-					itm->originalURL	= img->getStringAttribute(("OriginalURL"));
-					itm->largeURL		= img->getStringAttribute(("LargeURL"));
-					itm->mediumURL		= img->getStringAttribute(("MediumURL"));
-					itm->smallURL		= img->getStringAttribute(("SmallURL"));
-					itm->tinyURL		= img->getStringAttribute(("TinyURL"));
-					itm->thumbURL		= img->getStringAttribute(("ThumbURL"));
-					itm->albumURL		= img->getStringAttribute(("AlbumURL"));
+    for (int start = 1;;)
+    {
+        auto response = v2Request ("GET", albumId.uri + "!images?start=" + String (start)
+                                                      + "&count=" + String (pageSize));
 
-					images.add(itm);
+        if (! response.isObject())
+            return false;
 
-					img = img->getNextElementWithTagName(("Image"));
-				}
-			}
-		}
-		return images.size() > 0;
-	}
-	return false;
+        auto parseImage = [&images] (const var& img)
+        {
+            auto* itm = new ImageItem();
+
+            itm->id.uri       = uriOf (img["Uri"]);
+            itm->id.key       = img["ImageKey"].toString();
+            itm->id.id        = smugIdForUri (itm->id.uri);
+            itm->filename     = img["FileName"].toString();
+            itm->caption      = img["Caption"].toString();
+            itm->keywords     = img["Keywords"].toString();
+            itm->position     = 0;
+            itm->date         = img["DateTimeUploaded"].toString();
+            itm->format       = img["Format"].toString();
+            itm->serial       = 0;
+            itm->watermark    = bool (img["Watermarked"]);
+            itm->size         = int (img["ArchivedSize"]);
+            itm->width        = int (img["OriginalWidth"]);
+            itm->height       = int (img["OriginalHeight"]);
+            itm->md5sum       = img["ArchivedMD5"].toString();
+            itm->lastUpdated  = img["LastUpdated"].toString();
+            itm->originalURL  = img["ArchivedUri"].toString();
+            itm->thumbURL     = img["ThumbnailUrl"].toString();
+            itm->albumURL     = img["WebUri"].toString();
+
+            images.add (itm);
+        };
+
+        auto albumImage = response["AlbumImage"];
+
+        if (auto* array = albumImage.getArray())
+        {
+            for (auto& img : *array)
+                parseImage (img);
+        }
+        else if (albumImage.isObject())
+        {
+            parseImage (albumImage);
+        }
+
+        if (uriOf (response["Pages"]["NextPage"]).isEmpty())
+            break;
+
+        start += pageSize;
+    }
+
+    return images.size() > 0;
 }
 
-bool SmugMug::deleteCategory(int category)
+bool SmugMug::deleteCategory (int category)
 {
-	StringPairArray params;
-	params.set(("CategoryID"), String(category));
-	auto n = smugMugRequest(("smugmug.categories.delete"), params);
+    if (auto* f = folderForId (category))
+    {
+        if (v2Request ("DELETE", f->uri).isVoid())
+            return false;
 
-	if (n)
-	{	
-		if (n->getTagName() == ("rsp") && n->getStringAttribute(("stat")) == ("ok"))
-			return true;
-	}
-	return false;
+        folders.clearQuick();
+        return true;
+    }
+
+    return false;
 }
 
-bool SmugMug::deleteDuplicates(SmugID albumId)
+bool SmugMug::deleteDuplicates (SmugID albumId)
 {
-	OwnedArray<ImageItem> images;
-	if (getImages(images, albumId))
-	{
-		OwnedArray<SmugID> duplicateIds;
-		StringArray fileNames;
+    OwnedArray<ImageItem> images;
 
-		for (int i = 0; i < images.size(); i++)
-		{
-			if (fileNames.contains(images[i]->filename))
-				duplicateIds.add(new SmugID(images[i]->id));
-			else
-				fileNames.add(images[i]->filename);
-		}
+    if (getImages (images, albumId))
+    {
+        Array<SmugID> duplicateIds;
+        StringArray fileNames;
 
-		for (int i = 0; i < duplicateIds.size(); i++)
-			deleteImage(*duplicateIds[i]);
+        for (int i = 0; i < images.size(); i++)
+        {
+            if (fileNames.contains (images[i]->filename))
+                duplicateIds.add (images[i]->id);
+            else
+                fileNames.add (images[i]->filename);
+        }
 
-		return true;
-	}
-	return false;
+        for (auto& id : duplicateIds)
+            deleteImage (id);
+
+        return true;
+    }
+
+    return false;
 }
 
-bool SmugMug::deleteSubCategory(int subCategory)
+bool SmugMug::deleteSubCategory (int subCategory)
 {
-	StringPairArray params;
-	params.set(("SubCategoryID"), String(subCategory));
-	auto n = smugMugRequest(("smugmug.subcategories.delete"), params);
-
-	if (n)
-		if (n->getTagName() == ("rsp") && n->getStringAttribute(("stat")) == ("ok"))
-			return true;
-    
-	return false;
+    return deleteCategory (subCategory);
 }
 
-bool SmugMug::deleteAlbum(SmugID album)
+bool SmugMug::deleteAlbum (SmugID album)
 {
-	StringPairArray params;
-	params.set(("AlbumID"), String(album.id));
-	auto n = smugMugRequest(("smugmug.albums.delete"), params);
+    if (album.uri.isEmpty())
+        return false;
 
-	if (n)
-	{	
-		if (n->getTagName() == ("rsp") && n->getStringAttribute(("stat")) == ("ok"))
-			return true;
-	}
-	return false;
+    return ! v2Request ("DELETE", album.uri).isVoid();
 }
 
-bool SmugMug::deleteImage(SmugID image)
+bool SmugMug::deleteImage (SmugID image)
 {
-	StringPairArray params;
-	params.set(("ImageID"), String(image.id));
-	auto n = smugMugRequest(("smugmug.images.delete"), params);
+    if (image.uri.isEmpty())
+        return false;
 
-	if (n)
-	{	
-		if (n->getTagName() == ("rsp") && n->getStringAttribute(("stat")) == ("ok"))
-			return true;
-	}
-	return false;
+    return ! v2Request ("DELETE", image.uri).isVoid();
 }
 
-bool SmugMug::getAlbumList(OwnedArray<Album>& albums)
+bool SmugMug::getAlbumList (OwnedArray<Album>& albums)
 {
-	StringPairArray params;
-	auto n = smugMugRequest(("smugmug.albums.get"), params);
+    // The albums come out of the folder walk, so each one's category and sub
+    // category are exactly the folders it was found under -- no need to infer a
+    // parent from the album object. Cached, because the walk costs one request
+    // per category.
+    if (folders.isEmpty() && ! refreshFolders())
+        return false;
 
-	if (n)
-	{
-		XmlElement* a = n->getChildByName(("Albums"));
-		if (a)
-		{
-			XmlElement* alb = a->getChildByName(("Album"));
-			while (alb)
-			{
-				Album* album = new Album();
-				album->id.id         = alb->getIntAttribute(("id"));
-				album->id.key        = alb->getStringAttribute(("Key"));
-				album->title         = alb->getStringAttribute(("Title"));
+    for (auto& node : albumNodes)
+    {
+        auto* album = new Album();
 
-				XmlElement* cat = alb->getChildByName(("Category"));
-				if (cat)
-				{
-					album->category   = cat->getStringAttribute(("Name"));
-					album->categoryId = cat->getIntAttribute(("id"));
-				}
-				else
-				{
-					album->category   = "";
-					album->categoryId = -1;
-				}
+        album->id    = node.id;
+        album->title = node.name;
 
-				XmlElement* subcat = alb->getChildByName(("SubCategory"));
-				if (subcat)
-				{
-					album->subCategory   = subcat->getStringAttribute(("Name"));
-					album->subCategoryId = subcat->getIntAttribute(("id"));
-				}
-				else
-				{
-					album->subCategory   = "";
-					album->subCategoryId = -1;
-				}
+        album->categoryId    = -1;
+        album->subCategoryId = -1;
 
-				albums.add(album);
+        if (auto* parent = folderForId (node.parentFolderId))
+        {
+            if (parent->parentId == -1)
+            {
+                // Directly under the root: the folder is the category.
+                album->category   = parent->name;
+                album->categoryId = parent->id;
+            }
+            else if (auto* grandParent = folderForId (parent->parentId))
+            {
+                album->category      = grandParent->name;
+                album->categoryId    = grandParent->id;
+                album->subCategory   = parent->name;
+                album->subCategoryId = parent->id;
+            }
+        }
 
-				alb = alb->getNextElementWithTagName(("Album"));
-			}
-		}
-		return true;
-	}
-	return false;
+        albums.add (album);
+    }
+
+    return true;
 }
 
-bool SmugMug::getCategoryList(OwnedArray<Category>& categories)
+bool SmugMug::getCategoryList (OwnedArray<Category>& categories)
 {
-	StringPairArray params;
-	auto n = smugMugRequest(("smugmug.categories.get"), params);
+    if (folders.isEmpty() && ! refreshFolders())
+        return false;
 
-	if (n)
-	{
-		XmlElement* c = n->getChildByName(("Categories"));
-		if (c)
-		{
-			XmlElement* cat = c->getChildByName(("Category"));
-			while (cat)
-			{
-				Category* category = new Category();
-				category->id    = cat->getIntAttribute(("id"));
-				category->title = cat->getStringAttribute(("Name"));
-				categories.add(category);
+    for (auto& f : folders)
+    {
+        if (f.parentId != -1)
+            continue;
 
-				cat = cat->getNextElementWithTagName(("Category"));
-			}
-		}
-		return true;
-	}
-	return false;
+        auto* category = new Category();
+        category->id    = f.id;
+        category->title = f.name;
+        categories.add (category);
+    }
+
+    return true;
 }
 
-bool SmugMug::getSubCategoryList(OwnedArray<SubCategory>& subCategories)
+bool SmugMug::getSubCategoryList (OwnedArray<SubCategory>& subCategories)
 {
-	StringPairArray params;
-	auto n = smugMugRequest(("smugmug.subcategories.getAll"), params);
+    if (folders.isEmpty() && ! refreshFolders())
+        return false;
 
-	if (n)
-	{
-		XmlElement* c = n->getChildByName(("SubCategories"));
-		if (c)
-		{
-			XmlElement* subCat = c->getChildByName(("SubCategory"));
-			while (subCat)
-			{
-				SubCategory* subCategory = new SubCategory();
-				subCategory->id    = subCat->getIntAttribute(("id"));
-				subCategory->title = subCat->getStringAttribute(("Name"));
+    for (auto& f : folders)
+    {
+        if (f.parentId == -1)
+            continue;
 
-				XmlElement* cat = subCat->getChildByName(("Category"));
-				if (cat)
-					subCategory->parentId = cat->getIntAttribute(("id"));
+        auto* subCategory = new SubCategory();
+        subCategory->id       = f.id;
+        subCategory->parentId = f.parentId;
+        subCategory->title    = f.name;
+        subCategories.add (subCategory);
+    }
 
-				subCategories.add(subCategory);
-
-				subCat = subCat->getNextElementWithTagName(("SubCategory"));
-			}
-		}
-		return true;
-	}
-	return false;
+    return true;
 }
 
-int SmugMug::createCategory(const String& title)
+int SmugMug::createCategory (const String& title)
 {
-	int catId = -1;
+    if (! fetchAuthUser())
+        return -1;
 
-	StringPairArray params;
-	params.set(("Name"), title);
-	auto n = smugMugRequest(("smugmug.categories.create"), params);
+    auto folder = createNode (rootFolderUri, "Folder", title, {})["Folder"];
 
-	if (n)
-	{
-		XmlElement* a = n->getChildByName(("Category"));
-		if (a) 
-			catId = a->getIntAttribute(("id"), -1);
-	}
-	return catId;
+    if (! folder.isObject())
+        return -1;
+
+    folders.clearQuick();
+
+    auto id = smugIdForUri (uriOf (folder["Uris"]["Node"]));
+
+    if (id != -1)
+        addLogEntry ("Info: category created: " + title);
+
+    return id;
 }
 
-int SmugMug::createSubCategory(const int categoryId, const String& title)
-{	
-	int subCatId = -1;
-
-	StringPairArray params;
-	params.set(("CategoryID"), String(categoryId));
-	params.set(("Name"), title);
-	auto n = smugMugRequest(("smugmug.subcategories.create"), params);
-
-	if (n)
-	{
-		XmlElement* a = n->getChildByName(("SubCategory"));
-		if (a) 
-			subCatId = a->getIntAttribute(("id"), -1);
-	}
-	return subCatId;
-}
-
-SmugID SmugMug::createAlbum(const String& title, const int categoryId, const StringPairArray& albumFlags)
+int SmugMug::createSubCategory (const int categoryId, const String& title)
 {
-	SmugID newAlbum;
-	newAlbum.id = -1;
+    if (! fetchAuthUser())
+        return -1;
 
-	StringPairArray params(albumFlags);
-	params.set(("Title"), title);
-	params.set(("CategoryID"), String(categoryId));
-	auto n = smugMugRequest(("smugmug.albums.create"), params);
+    if (folders.isEmpty())
+        refreshFolders();
 
-	if (n)
-	{
-		XmlElement* a = n->getChildByName(("Album"));
-		if (a) 
-		{
-			newAlbum.id  = a->getIntAttribute(("id"), -1);
-			newAlbum.key = a->getStringAttribute(("Key"));
-		}
+    auto* parent = folderForId (categoryId);
 
-		if (newAlbum.id != -1)
-			addLogEntry(("Info: album created: ") + title);
-	}
-	return newAlbum;
+    if (parent == nullptr)
+        return -1;
+
+    auto folder = createNode (parent->uri, "Folder", title, {})["Folder"];
+
+    if (! folder.isObject())
+        return -1;
+
+    folders.clearQuick();
+
+    auto id = smugIdForUri (uriOf (folder["Uris"]["Node"]));
+
+    if (id != -1)
+        addLogEntry ("Info: sub category created: " + title);
+
+    return id;
 }
 
-std::unique_ptr<XmlElement> SmugMug::smugMugRequest(const String& method, const StringPairArray& params_, bool upload)
+SmugID SmugMug::createAlbum (const String& title, const int categoryId, const StringPairArray& albumFlags)
 {
-	StringPairArray params(params_);
-	params.set (("method"), method);
+    SmugID newAlbum;
 
-	URL url (upload ? UPLOAD_URL : BASE_URL);
+    if (! fetchAuthUser())
+        return newAlbum;
 
-	StringArray keys = params.getAllKeys();
-	StringArray vals = params.getAllValues();
+    if (folders.isEmpty())
+        refreshFolders();
 
-	for (int i = 0; i < keys.size(); i++)
-		url = url.withParameter (keys[i], vals[i]);
-    
-    auto& s = *Settings::getInstance();
-    
-    OAuth::Consumer consumer (consumer_key, consumer_secret);
-    OAuth::Token token (s.accessToken.toStdString(), s.accessSecret.toStdString());
-    OAuth::Client oauth (&consumer, &token);
-    
-    auto queryParams = url.toString (true).fromFirstOccurrenceOf ("?", false, false);
-    auto baseUrl = url.toString (false);
-    std::string oAuthQueryString = oauth.getURLQueryString (OAuth::Http::Get, baseUrl.toStdString() + "?" + queryParams.toStdString());
+    // The dialog hands back a category, and optionally a sub category inside it.
+    // The deeper of the two is the album's parent.
+    String parentUri = rootFolderUri;
 
-    auto newUrl = baseUrl + "?" + String (oAuthQueryString.c_str());
-	auto x = URL (newUrl).readEntireXmlStream (upload);
-    
-   #ifdef JUCE_DEBUG
-	Logger::outputDebugString (url.toString (true));
-	if (x != nullptr)
-		Logger::outputDebugString (x->toString());
-   #endif
-    
-	if (x != nullptr && x->getStringAttribute (("stat")) == ("fail"))
-		if (auto err = x->getChildByName (("err")))
-			addLogEntry(("Error: ") + err->getStringAttribute (("msg")));
-    
-	return x;
+    if (auto* category = folderForId (categoryId))
+        parentUri = category->uri;
+
+    if (albumFlags.containsKey ("SubCategoryID"))
+        if (auto* subCategory = folderForId (albumFlags["SubCategoryID"].getIntValue()))
+            parentUri = subCategory->uri;
+
+    // Album settings that map cleanly onto v2. The remaining 1.3.0 flags the
+    // dialog collects (Filenames, Comments, External, EXIF, Share, Header,
+    // Larges, Clean, Watermarking, SmugSearchable, WorldSearchable, FamilyEdit,
+    // FriendEdit) have no straightforward v2 equivalent and are skipped rather
+    // than sent as fields the API would reject.
+    auto* fields = new DynamicObject();
+
+    fields->setProperty ("Privacy", albumFlags["Public"] == "0" ? "Unlisted" : "Public");
+
+    if (albumFlags["Description"].isNotEmpty())  fields->setProperty ("Description",  albumFlags["Description"]);
+    if (albumFlags["Keywords"].isNotEmpty())     fields->setProperty ("Keywords",     albumFlags["Keywords"]);
+    if (albumFlags["Password"].isNotEmpty())     fields->setProperty ("Password",     albumFlags["Password"]);
+    if (albumFlags["PasswordHint"].isNotEmpty()) fields->setProperty ("PasswordHint", albumFlags["PasswordHint"]);
+
+    if (albumFlags.containsKey ("Originals"))
+        fields->setProperty ("Downloadable", albumFlags["Originals"] == "1");
+
+    if (albumFlags.containsKey ("Protected"))
+        fields->setProperty ("Protected", albumFlags["Protected"] == "1");
+
+    if (albumFlags.containsKey ("SortMethod"))
+    {
+        // The dialog still offers the 1.3.0 sort names.
+        auto sort = albumFlags["SortMethod"];
+
+        if (sort == "Position" || sort == "Caption" || sort == "FileName")
+            fields->setProperty ("SortMethod", sort);
+        else if (sort.isNotEmpty())
+            fields->setProperty ("SortMethod", "Date Taken");
+    }
+
+    if (albumFlags.containsKey ("SortDirection"))
+        fields->setProperty ("SortDirection", albumFlags["SortDirection"] == "1" ? "Descending" : "Ascending");
+
+    auto album = createNode (parentUri, "Album", title, var (fields))["Album"];
+
+    if (album.isObject())
+    {
+        newAlbum.uri = uriOf (album["Uri"]);
+        newAlbum.key = album["AlbumKey"].toString();
+        newAlbum.id  = smugIdForUri (newAlbum.uri);
+
+        if (newAlbum.uri.isNotEmpty())
+            addLogEntry ("Info: album created: " + title);
+    }
+
+    return newAlbum;
 }
 
 void SmugMug::uploadImages (UploadRequest* ur, bool allowDupeCheck)
@@ -982,17 +1204,54 @@ SmugID SmugMug::uploadFile (int queue, int index)
 
 	Time start = Time::getCurrentTime();
 
+	lock.enter();
+	auto albumUri = uploadQueue[queue]->getAlbumId().uri;
+	lock.exit();
+
+	if (albumUri.isEmpty())
+	{
+		uf.status = UploadFile::Failed;
+		addLogEntry ("Error: no destination album for " + uf.file.getFileName());
+		return retval;
+	}
+
+	// v2 uploads go to upload.smugmug.com as an OAuth-signed POST, with the
+	// destination carried in X-Smug-AlbumUri. The old X-Smug-SessionID scheme
+	// died with the 1.3.0 API.
+	const String uploadUrl = String ("https://") + UPLOAD_HOST + "/";
+	String authHeader;
+
+	{
+		auto& settings = *Settings::getInstance();
+
+		try
+		{
+			OAuth::Consumer consumer (consumer_key, consumer_secret);
+			OAuth::Token token (settings.accessToken.toStdString(), settings.accessSecret.toStdString());
+			OAuth::Client oauth (&consumer, &token);
+
+			authHeader = String (oauth.getFormattedHttpHeader (OAuth::Http::Post, uploadUrl.toStdString()).c_str()).trimEnd();
+		}
+		catch (const std::exception& e)
+		{
+			uf.status = UploadFile::Failed;
+			addLogEntry (String ("Error: could not sign upload: ") + e.what());
+			return retval;
+		}
+	}
+
 	String headers;
     String filename = uf.file.getFileName();
-    headers = "PUT http://upload.smugmug.com/" + URL::addEscapeChars(filename, false) + " HTTP/1.1\r\n" +
-		      "Host: upload.smugmug.com\r\n" +
-			  "Content-Length: " + String(uf.file.getSize()) + "\r\n" +
-		      "Content-MD5: " + md5.toHexString() + "\r\n" +
-			  "X-Smug-SessionID: " + sessionId + "\r\n" +
-			  "X-Smug-Version: 1.3.0\r\n" +
-			  "X-Smug-ResponseType: REST\r\n" +
-			  "X-Smug-AlbumID: " + String(uploadQueue[queue]->getAlbumId().id) + "\r\n" +
-			  "X-Smug-FileName: " + filename + "\r\n\r\n";
+    headers = "POST / HTTP/1.1\r\n"
+		      "Host: " UPLOAD_HOST "\r\n"
+		      + authHeader + "\r\n"
+			  "Content-Length: " + String(uf.file.getSize()) + "\r\n"
+		      "Content-MD5: " + md5.toHexString() + "\r\n"
+			  "X-Smug-Version: v2\r\n"
+			  "X-Smug-ResponseType: JSON\r\n"
+			  "X-Smug-AlbumUri: " + albumUri + "\r\n"
+			  "X-Smug-FileName: " + filename + "\r\n"
+			  "Connection: close\r\n\r\n";
 
    #ifdef JUCE_DEBUG
 	Logger::outputDebugString (headers);
@@ -1109,31 +1368,33 @@ SmugID SmugMug::uploadFile (int queue, int index)
                #endif
 				soc.close();
 
-				String xml = response.fromFirstOccurrenceOf (("<?xml"), true, true);
-				XmlDocument doc (xml);
-				
-				if (auto e = doc.getDocumentElement())
+				auto body = response.fromFirstOccurrenceOf ("{", true, false);
+				auto parsed = JSON::parse (body);
+
+				if (parsed["stat"].toString() == "ok")
 				{
-					if (auto image = e->getChildByName (("Image")))
+					if (auto image = parsed["Image"]; image.isObject())
 					{
-						int val = image->getIntAttribute (("id"));
-						if (val >= 0)
-						{
-							uf.status = UploadFile::Finished;
-							uf.complete = 1.0f;
-							uf.url = image->getStringAttribute ("URL");
+						uf.status = UploadFile::Finished;
+						uf.complete = 1.0f;
+						uf.url = image["URL"].toString();
 
-							Time end = Time::getCurrentTime();
-							RelativeTime diff = end - start;
+						Time end = Time::getCurrentTime();
+						RelativeTime diff = end - start;
 
-							addLogEntry(("Info: ") + uf.file.getFileName() + (" uploaded in ") + String(int(diff.inSeconds())) + (" seconds [") + String(uf.file.getSize() / 1024 / diff.inSeconds(), 1) + ("KB/s]"));
+						addLogEntry(("Info: ") + uf.file.getFileName() + (" uploaded in ") + String(int(diff.inSeconds())) + (" seconds [") + String(uf.file.getSize() / 1024 / diff.inSeconds(), 1) + ("KB/s]"));
 
-							retval.id  = val;
-							retval.key = image->getStringAttribute(("Key"));
-								
-							return retval;
-						}
+						retval.uri = image["ImageUri"].toString();
+						retval.key = image["Key"].toString();
+						retval.id  = smugIdForUri (retval.uri);
+
+						return retval;
 					}
+				}
+				else
+				{
+					addLogEntry ("Error: upload of " + uf.file.getFileName() + " failed: "
+					             + parsed["message"].toString());
 				}
 			}
 		} 		

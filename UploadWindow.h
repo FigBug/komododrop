@@ -69,9 +69,9 @@ private:
 	void startUpload (UploadRequest* ur, SmugID albumId, bool openBrowser);
 
 	SmugMug smugMug;
-	Component* trayIcon;
+	Component* trayIcon = nullptr;
 	ComponentDragger dragger;
-	bool drag;
+	bool drag = false;
 
 	// FileChooser::launchAsync needs the chooser to outlive the call.
 	std::unique_ptr<FileChooser> fileChooser;

@@ -15,7 +15,7 @@ struct UploadDialogContext
 	bool open = false;
 };
 
-#if defined (JUCE_WIN32) || defined (JUCE_LINUX)
+#if JUCE_WINDOWS || JUCE_LINUX
 class TrayIcon : public SystemTrayIconComponent
 {
 public:
@@ -38,7 +38,7 @@ public:
 		g2.fillAll(Colours::transparentBlack);
 		g2.drawImage(img, 0, 0, 16, 16, 0, 0, 64, 64, false);
 
-		setIconImage(icon);
+		setIconImage(icon, icon);
 		setIconTooltip(JUCEApplication::getInstance()->getApplicationName());
 	}
 
@@ -99,7 +99,7 @@ UploadWindow::UploadWindow()
 
 	setVisible(true);
 	
-   #if defined (JUCE_WIN32) || defined (JUCE_LINUX)
+   #if JUCE_WINDOWS || JUCE_LINUX
 	trayIcon = new TrayIcon(this);
    #endif
    #ifdef JUCE_MAC
@@ -112,7 +112,7 @@ UploadWindow::~UploadWindow()
    #if JUCE_MAC
 	MenuBarModel::setMacMainMenu (nullptr);
    #endif
-   #if JUCE_WIN32 || JUCE_LINUX
+   #if JUCE_WINDOWS || JUCE_LINUX
 	delete trayIcon;
    #endif
 	deleteAllChildren();
