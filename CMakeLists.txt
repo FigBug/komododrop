@@ -88,6 +88,22 @@ target_compile_definitions(KomodoDrop PRIVATE
     JUCE_APPLICATION_NAME_STRING="$<TARGET_PROPERTY:KomodoDrop,JUCE_PRODUCT_NAME>"
     JUCE_APPLICATION_VERSION_STRING="$<TARGET_PROPERTY:KomodoDrop,JUCE_VERSION>")
 
+# Release builds carry debug info so crash reports can be symbolicated. It lands
+# in the dSYM / PDB / .debug file that Installer/build.sh archives, not in the
+# binary that ships, so this doesn't bloat the installers.
+if(MSVC)
+    target_compile_options(KomodoDrop PRIVATE $<$<CONFIG:Release>:/Zi>)
+    target_link_options(KomodoDrop PRIVATE $<$<CONFIG:Release>:/DEBUG /OPT:REF /OPT:ICF>)
+else()
+    target_compile_options(KomodoDrop PRIVATE $<$<CONFIG:Release>:-g>)
+endif()
+
+if(APPLE)
+    set_target_properties(KomodoDrop PROPERTIES
+        XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym"
+        XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS "YES")
+endif()
+
 target_link_libraries(KomodoDrop PRIVATE
     liboauthcpp
     gin

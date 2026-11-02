@@ -132,9 +132,19 @@ if [ "$PLATFORM" = "macOS" ]; then
 
   cp "$PKG_OUT" "$PROJECT_ROOT/bin/"
 
-  # dSYM for symbolicating crash reports
-  if [ -d "$ART_DIR/$APP_NAME.app.dSYM" ]; then
+  # dSYM for symbolicating crash reports. The Xcode generator doesn't emit one for
+  # Release, so build it from the binary -- which is unstripped, and dsymutil
+  # preserves the Mach-O UUID, so it still matches what ships.
+  DSYM="$ART_DIR/$APP_NAME.app.dSYM"
+
+  if [ ! -d "$DSYM" ]; then
+    dsymutil "$ART_DIR/$APP_NAME.app/Contents/MacOS/$APP_NAME" -o "$DSYM" || true
+  fi
+
+  if [ -d "$DSYM" ]; then
     ( cd "$ART_DIR" && zip -qr "$PROJECT_ROOT/bin/Symbols_Mac.zip" "$APP_NAME.app.dSYM" )
+  else
+    echo "WARNING: no dSYM could be produced, Symbols_Mac.zip will be missing"
   fi
 
 ############################################################
@@ -247,10 +257,16 @@ else
 
   cp "$EXE_OUT" "$PROJECT_ROOT/bin/"
 
-  if [ -f "$ART_DIR/$APP_NAME.pdb" ]; then
+  # Search for the pdb rather than assuming where the generator leaves it, and say
+  # so if it's missing instead of quietly shipping a release without symbols.
+  PDB=$(find "$PROJECT_ROOT/Builds/vs" -name "$APP_NAME.pdb" -print -quit 2>/dev/null)
+
+  if [ -n "$PDB" ]; then
     SYM_DIR="$STAGE/symbols"
     mkdir -p "$SYM_DIR"
-    cp "$ART_DIR/$APP_NAME.pdb" "$SYM_DIR/"
+    cp "$PDB" "$SYM_DIR/"
     ( cd "$SYM_DIR" && 7z a "$PROJECT_ROOT/bin/Symbols_Win.zip" "$APP_NAME.pdb" )
+  else
+    echo "WARNING: no $APP_NAME.pdb found under Builds/vs, Symbols_Win.zip will be missing"
   fi
 fi
