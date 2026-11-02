@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>KomodoDrop</title>
+    <organization>com.rabien</organization>
+    <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true"/>
+    <options customize="never" require-scripts="false" rootVolumeOnly="true"/>
+
+    <choices-outline>
+        <line choice="com.rabien.KomodoDrop.app"/>
+    </choices-outline>
+
+    <choice id="com.rabien.KomodoDrop.app"
+            title="KomodoDrop"
+            description="Install KomodoDrop to /Applications"
+            visible="true"
+            enabled="false"
+            selected="true">
+        <pkg-ref id="com.rabien.KomodoDrop.app.pkg"/>
+    </choice>
+
+    <pkg-ref id="com.rabien.KomodoDrop.app.pkg" version="0">app.pkg</pkg-ref>
+</installer-gui-script>

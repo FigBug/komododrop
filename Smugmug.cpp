@@ -1,5 +1,6 @@
 #include "Smugmug.h"
 #include "Settings.h"
+#include <liboauthcpp/liboauthcpp.h>
 
 #define BASE_URL    "https://api.smugmug.com/services/api/rest/1.3.0/"
 #define UPLOAD_URL  "https://upload.smugmug.com/services/api/rest/1.3.0/"
@@ -374,17 +375,19 @@ private:
 	UploadRequest* ur;
 };
 
-String getPin()
+// Asks for the verifier code SmugMug shows in the browser. Returns immediately;
+// `callback` gets the code, or an empty string if the user cancelled.
+static void getPinAsync (std::function<void (String)> callback)
 {
-    AlertWindow aw ("Komodo Drop", "Authorization:", AlertWindow::InfoIcon);
-    aw.addTextEditor ("code", "", "Code:");
-    aw.addButton ("ok", 1);
-    aw.addButton ("cancel", 2);
-    
-    if (aw.runModalLoop() == 1 && aw.getTextEditorContents ("code").isNotEmpty())
-        return aw.getTextEditorContents ("code");
-    
-    return {};
+    auto* aw = new AlertWindow ("Komodo Drop", "Authorization:", MessageBoxIconType::InfoIcon);
+    aw->addTextEditor ("code", "", "Code:");
+    aw->addButton ("ok", 1);
+    aw->addButton ("cancel", 2);
+
+    aw->enterModalState (true, ModalCallbackFunction::create ([aw, callback] (int result)
+    {
+        callback (result == 1 ? aw->getTextEditorContents ("code").trim() : String());
+    }), true);
 }
 
 //==============================================================================
@@ -407,58 +410,102 @@ String Album::getDisplayTitle()
 //==============================================================================
 SmugMug::SmugMug()
 {
-    authorizeIfNeeded();
+    // Kick the authorization off now; it completes on the message thread once the
+    // user has pasted the verifier code.
+    authorize (nullptr);
 }
 
-void SmugMug::authorizeIfNeeded()
+void SmugMug::ensureLoggedIn (std::function<void (bool)> callback)
 {
+    if (isLoggedIn())
+    {
+        if (callback)
+            callback (true);
+
+        return;
+    }
+
+    authorize (std::move (callback));
+}
+
+void SmugMug::authorize (std::function<void (bool)> callback)
+{
+    // Only ever run one authorization at a time; later callers wait on this one.
+    if (callback)
+        authCallbacks.push_back (std::move (callback));
+
+    if (authorizing)
+        return;
+
+    authorizing = true;
+
     auto& settings = *Settings::getInstance();
     //if (settings.accessToken.isNotEmpty())
     //    return;
-    
+
     OAuth::Consumer consumer (consumer_key, consumer_secret);
     OAuth::Client oauth (&consumer);
-    
+
     std::string base_request_token_url = request_token_url + (request_token_query_args.empty() ? std::string ("") : (std::string ("?") + request_token_query_args));
     std::string oAuthQueryString = oauth.getURLQueryString (OAuth::Http::Get, base_request_token_url);
-    
+
     std::string url1 = request_token_url + "?" + oAuthQueryString;
     auto rsp1 = URL (url1.c_str()).readEntireTextStream();
-    
+
     OAuth::Token request_token = OAuth::Token::extract (rsp1.toStdString());
-    
+
     std::string url2 = authorize_url + "?oauth_token=" + request_token.key() + "&Access='Full'&Permissions='Modify'";
     URL (url2.c_str()).launchInDefaultBrowser();
-    
-    std::string pin = getPin().toStdString();
-    request_token.setPin (pin);
-    
-    oauth = OAuth::Client (&consumer, &request_token);
 
-    oAuthQueryString = oauth.getURLQueryString (OAuth::Http::Get, access_token_url, std::string( "" ), true);
-    std::string url3 = access_token_url + "?" + oAuthQueryString;
-    
-    auto access_token_resp = URL (url3.c_str()).readEntireTextStream();
+    // The user now has to copy the verifier code out of the browser, so the rest of
+    // the exchange has to wait for the prompt instead of blocking here.
+    getPinAsync ([this, request_token] (String pin) mutable
+    {
+        if (pin.isEmpty())
+        {
+            finishAuthorize (false);
+            return;
+        }
 
-    OAuth::KeyValuePairs access_token_resp_data = OAuth::ParseKeyValuePairs(access_token_resp.toStdString());
-    OAuth::Token access_token = OAuth::Token::extract (access_token_resp_data);
-    
-    settings.accessToken = access_token.key().c_str();
-    settings.accessSecret = access_token.secret().c_str();
-    settings.save();
+        request_token.setPin (pin.toStdString());
+
+        OAuth::Consumer consumer (consumer_key, consumer_secret);
+        OAuth::Client oauth (&consumer, &request_token);
+
+        auto oAuthQueryString = oauth.getURLQueryString (OAuth::Http::Get, access_token_url, std::string (""), true);
+        std::string url3 = access_token_url + "?" + oAuthQueryString;
+
+        auto access_token_resp = URL (url3.c_str()).readEntireTextStream();
+
+        OAuth::KeyValuePairs access_token_resp_data = OAuth::ParseKeyValuePairs (access_token_resp.toStdString());
+        OAuth::Token access_token = OAuth::Token::extract (access_token_resp_data);
+
+        auto& s = *Settings::getInstance();
+        s.accessToken  = access_token.key().c_str();
+        s.accessSecret = access_token.secret().c_str();
+        s.save();
+
+        finishAuthorize (isLoggedIn());
+    });
+}
+
+void SmugMug::finishAuthorize (bool success)
+{
+    authorizing = false;
+
+    // Move the list aside first: a callback may well start another authorization.
+    auto callbacks = std::move (authCallbacks);
+    authCallbacks.clear();
+
+    for (auto& cb : callbacks)
+        cb (success);
 }
 
 SmugMug::~SmugMug()
 {
 }
 
-void SmugMug::login()
-{
-    auto& s = *Settings::getInstance();
-    s.accessSecret = {};
-    s.accessToken  = {};
-    authorizeIfNeeded();
-}
+
 
 bool SmugMug::isPower()
 {

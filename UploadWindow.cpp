@@ -1,6 +1,19 @@
 #include "UploadWindow.h"
 #include "Settings.h"
 #include "UploadComponent.h"
+#include "AsyncDialogs.h"
+
+// The upload dialog writes the user's choices straight into these, so they have to
+// outlive the (now asynchronous) dialog.
+struct UploadDialogContext
+{
+	bool newAlbum = false;
+	int catId = 0;
+	String title;
+	StringPairArray params;
+	SmugID albumId;
+	bool open = false;
+};
 
 #if defined (JUCE_WIN32) || defined (JUCE_LINUX)
 class TrayIcon : public SystemTrayIconComponent
@@ -63,8 +76,8 @@ UploadDialog::~UploadDialog()
 
 void UploadDialog::closeButtonPressed()
 {
+	// Deleted by the ModalComponentManager once the modal state unwinds.
 	exitModalState(0);
-	delete this;
 }
 
 UploadWindow::UploadWindow()
@@ -74,7 +87,9 @@ UploadWindow::UploadWindow()
 	addToDesktop (0);
 	setAlwaysOnTop (true);
 
-	juce::Rectangle<int> rc = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+	juce::Rectangle<int> rc;
+	if (auto* display = Desktop::getInstance().getDisplays().getPrimaryDisplay())
+		rc = display->userBounds.toNearestInt();
 
 	Settings* settings = Settings::getInstance();
 	if (settings->x == -1 || settings->y == -1 || !Desktop::getInstance().getDisplays().getTotalBounds(true).contains(settings->x, settings->y))
@@ -142,7 +157,7 @@ void UploadWindow::paint(Graphics& g)
 		
 
 		GlyphArrangement glyphs;
-		glyphs.addLineOfText(Font(25.0f, Font::bold), String(percent, 1) + ("%"), 0, 0);
+		glyphs.addLineOfText(Font (FontOptions (25.0f).withStyle ("Bold")), String(percent, 1) + ("%"), 0, 0);
 
 		Path p;
 		glyphs.createPath(p);
@@ -246,19 +261,46 @@ PopupMenu UploadWindow::createMenu()
 
 void UploadWindow::showMenu()
 {
-	PopupMenu m = createMenu();
-	int res = m.show();
-	handleCommand(res);
+	Component::SafePointer<UploadWindow> safeThis (this);
+
+	createMenu().showMenuAsync (PopupMenu::Options().withMousePosition(),
+		[safeThis] (int res)
+		{
+			if (safeThis != nullptr && res != 0)
+				safeThis->handleCommand (res);
+		});
+}
+
+void UploadWindow::withLogin (std::function<void()> fn)
+{
+	Component::SafePointer<UploadWindow> safeThis (this);
+
+	smugMug.ensureLoggedIn ([safeThis, fn] (bool loggedIn)
+	{
+		if (safeThis != nullptr && loggedIn)
+			fn();
+	});
 }
 
 void UploadWindow::handleCommand(int res)
 {
+	Component::SafePointer<UploadWindow> safeThis (this);
+
 	if (res == 1)
 	{
-		if (!smugMug.isUploading() || AlertWindow::showOkCancelBox(AlertWindow::InfoIcon, "Komodo Drop", 
-			"There is an upload in progress, quit anyway?") == 1)
+		if (!smugMug.isUploading())
 		{
 			JUCEApplication::quit();
+		}
+		else
+		{
+			showConfirmAsync (MessageBoxIconType::InfoIcon, "Komodo Drop",
+				"There is an upload in progress, quit anyway?", "ok", "cancel",
+				[] (bool quit)
+				{
+					if (quit)
+						JUCEApplication::quit();
+				});
 		}
 	}
 	else if (res == 2)
@@ -267,235 +309,167 @@ void UploadWindow::handleCommand(int res)
 	}
 	else if (res == 3)
 	{
-		AlertWindow::showMessageBox(AlertWindow::InfoIcon, "Komodo Drop " + JUCEApplication::getInstance()->getApplicationVersion(), 
-			"Created By: Roland Rabien (roland@rabien.com)\nBased on JUCE (www.rawmaterialsoftware.com)");
+		showMessageAsync (MessageBoxIconType::InfoIcon,
+			"Komodo Drop " + JUCEApplication::getInstance()->getApplicationVersion(),
+			"Created By: Roland Rabien (roland@rabien.com)\nBased on JUCE (www.juce.com)");
 	}
 	else if (res == 4)
 	{
 		setVisible(!isVisible());
 	}
-	else if (res == 5)
+	else if (res == 5 || res == 16)
 	{
-		if (!smugMug.isLoggedIn())
-			smugMug.login();
+		const bool dupesOnly = (res == 16);
 
-		OwnedArray<Album> albums;
-		smugMug.getAlbumList(albums);
-		if (albums.size() > 0)
+		withLogin ([safeThis, dupesOnly]
 		{
-			ComboBox* album = new ComboBox("");
-			album->setSize(300, 26);
-			album->setVisible(true);
+			OwnedArray<Album> albums;
+			safeThis->smugMug.getAlbumList(albums);
+
+			if (albums.isEmpty())
+				return;
+
+			StringArray labels;
+			Array<int> ids;
+			Array<SmugID> albumIds;
 
 			for (int i = 0; i < albums.size(); i++)
-				album->addItem(albums[i]->getDisplayTitle(), i + 1);
-			album->setSelectedItemIndex(0);
-			
-			AlertWindow aw("Komodo Drop", "Delete album:", AlertWindow::InfoIcon);
-			aw.addCustomComponent(album);
-			aw.addButton("ok", 1);
-			aw.addButton("cancel", 2);
-
-			if (aw.runModalLoop() == 1)
 			{
-				smugMug.deleteAlbum(albums[album->getSelectedId() - 1]->id);
+				labels.add(albums[i]->getDisplayTitle());
+				ids.add(i + 1);
+				albumIds.add(albums[i]->id);
 			}
-			delete album;
-		}
+
+			showChooserAsync (dupesOnly ? "Delete duplicate images from album:" : "Delete album:",
+				labels, ids, {},
+				[safeThis, albumIds, dupesOnly] (int selectedId, String)
+				{
+					if (safeThis == nullptr || selectedId < 1 || selectedId > albumIds.size())
+						return;
+
+					if (dupesOnly)
+						safeThis->smugMug.deleteDuplicates(albumIds[selectedId - 1]);
+					else
+						safeThis->smugMug.deleteAlbum(albumIds[selectedId - 1]);
+				});
+		});
 	}
 	else if (res == 6)
 	{
-		if (!smugMug.isLoggedIn())
-			smugMug.login();
-
-		OwnedArray<Category> categories;
-		smugMug.getCategoryList(categories);
-		if (categories.size())
+		withLogin ([safeThis]
 		{
-			ComboBox* cats = new ComboBox("");
-			cats->setSize(300, 26);
-			cats->setVisible(true);
+			OwnedArray<Category> categories;
+			safeThis->smugMug.getCategoryList(categories);
+
+			if (categories.isEmpty())
+				return;
+
+			StringArray labels;
+			Array<int> ids;
 
 			for (int i = 0; i < categories.size(); i++)
-				cats->addItem(categories[i]->title, categories[i]->id + 1);
-			cats->setSelectedItemIndex(0);
-			
-			AlertWindow aw("Komodo Drop", "Delete category:", AlertWindow::InfoIcon);
-			aw.addCustomComponent(cats);
-			aw.addButton("ok", 1);
-			aw.addButton("cancel", 2);
-
-			if (aw.runModalLoop() == 1)
 			{
-				smugMug.deleteCategory(cats->getSelectedId() - 1);
+				labels.add(categories[i]->title);
+				ids.add(categories[i]->id + 1);
 			}
-			delete cats;
-		}
+
+			showChooserAsync ("Delete category:", labels, ids, {},
+				[safeThis] (int selectedId, String)
+				{
+					if (safeThis != nullptr && selectedId > 0)
+						safeThis->smugMug.deleteCategory(selectedId - 1);
+				});
+		});
 	}
 	else if (res == 7)
 	{
-		if (!smugMug.isLoggedIn())
-			smugMug.login();
-
-		OwnedArray<Category> categories;
-		smugMug.getCategoryList(categories);
-
-		OwnedArray<SubCategory> subCategories;
-		smugMug.getSubCategoryList(subCategories);
-
-		if (subCategories.size())
+		withLogin ([safeThis]
 		{
-			ComboBox* cats = new ComboBox("");
-			cats->setSize(300, 26);
-			cats->setVisible(true);
+			OwnedArray<Category> categories;
+			safeThis->smugMug.getCategoryList(categories);
+
+			OwnedArray<SubCategory> subCategories;
+			safeThis->smugMug.getSubCategoryList(subCategories);
+
+			if (subCategories.isEmpty())
+				return;
+
+			StringArray labels;
+			Array<int> ids;
 
 			for (int i = 0; i < subCategories.size(); i++)
 			{
-				int j;
-				for (j = 0; j < categories.size(); j++)
+				// A sub category whose parent isn't in the list is shown on its own
+				// rather than indexing past the end of `categories`.
+				String label;
+
+				for (int j = 0; j < categories.size(); j++)
 				{
 					if (categories[j]->id == subCategories[i]->parentId)
+					{
+						label = categories[j]->title + " >> ";
 						break;
+					}
 				}
-				cats->addItem(categories[j]->title + " >> " + subCategories[i]->title, subCategories[i]->id + 1);
-			}
-			cats->setSelectedItemIndex(0);
-			
-			AlertWindow aw("Komodo Drop", "Delete sub category:", AlertWindow::InfoIcon);
-			aw.addCustomComponent(cats);
-			aw.addButton("ok", 1);
-			aw.addButton("cancel", 2);
 
-			if (aw.runModalLoop() == 1)
-			{
-				smugMug.deleteSubCategory(cats->getSelectedId() - 1);
+				labels.add(label + subCategories[i]->title);
+				ids.add(subCategories[i]->id + 1);
 			}
-			delete cats;
-		}
+
+			showChooserAsync ("Delete sub category:", labels, ids, {},
+				[safeThis] (int selectedId, String)
+				{
+					if (safeThis != nullptr && selectedId > 0)
+						safeThis->smugMug.deleteSubCategory(selectedId - 1);
+				});
+		});
 	}
 	else if (res == 8)
 	{
-		if (!smugMug.isLoggedIn())
-			smugMug.login();
-
-			AlertWindow aw("Komodo Drop", "Create category:", AlertWindow::InfoIcon);
-			aw.addTextEditor("name", "", "category name:");
-			aw.addButton("ok", 1);
-			aw.addButton("cancel", 2);
-
-			if (aw.runModalLoop() == 1 && aw.getTextEditorContents("name").isNotEmpty())
-			{
-				smugMug.createCategory(aw.getTextEditorContents("name"));
-			}
+		withLogin ([safeThis]
+		{
+			showChooserAsync ("Create category:", {}, {}, "category name:",
+				[safeThis] (int, String name)
+				{
+					if (safeThis != nullptr)
+						safeThis->smugMug.createCategory(name);
+				});
+		});
 	}
 	else if (res == 9)
 	{
-		if (!smugMug.isLoggedIn())
-			smugMug.login();
-
-		OwnedArray<Category> categories;
-		smugMug.getCategoryList(categories);
-
-		if (categories.size())
+		withLogin ([safeThis]
 		{
-			ComboBox* cats = new ComboBox("");
-			cats->setSize(300, 26);
-			cats->setVisible(true);
+			OwnedArray<Category> categories;
+			safeThis->smugMug.getCategoryList(categories);
+
+			if (categories.isEmpty())
+				return;
+
+			StringArray labels;
+			Array<int> ids;
 
 			for (int i = 0; i < categories.size(); i++)
-				cats->addItem(categories[i]->title, categories[i]->id + 1);
-			cats->setSelectedItemIndex(0);
-			
-			AlertWindow aw("Komodo Drop", "Create sub category:", AlertWindow::InfoIcon);
-			aw.addCustomComponent(cats);
-			aw.addTextEditor("name", "", "sub category name:");
-			aw.addButton("ok", 1);
-			aw.addButton("cancel", 2);
-
-			if (aw.runModalLoop() == 1 && aw.getTextEditorContents("name").isNotEmpty())
 			{
-				smugMug.createSubCategory(cats->getSelectedId() - 1, aw.getTextEditorContents("name"));
+				labels.add(categories[i]->title);
+				ids.add(categories[i]->id + 1);
 			}
-			delete cats;
-		}
+
+			showChooserAsync ("Create sub category:", labels, ids, "sub category name:",
+				[safeThis] (int selectedId, String name)
+				{
+					if (safeThis != nullptr && selectedId > 0)
+						safeThis->smugMug.createSubCategory(selectedId - 1, name);
+				});
+		});
 	}
 	else if (res == 10)
 	{
 		smugMug.cancelUploads();
 	}
-	else if (res == 11)
+	else if (res == 11 || res == 12 || res == 13 || res == 19)
 	{
-		FileChooser fc("Komodo Drop", File::getSpecialLocation(File::userDocumentsDirectory));
-		if (fc.browseForMultipleFilesToOpen())
-		{
-			const Array<File>& files = fc.getResults();
-			StringArray names;
-
-			for (int i = 0; i < files.size(); i++)
-				names.add(files[i].getFullPathName());
-
-			filesDropped(names, 0, 0);
-		}
-	}
-	else if (res == 12)
-	{
-		FileChooser fc("Komodo Drop", File::getSpecialLocation(File::userDocumentsDirectory));
-		if (fc.browseForDirectory())
-		{
-			File dir = fc.getResult();
-
-			Array<File> files;
-			StringArray names;
-			dir.findChildFiles(files, File::findFiles, false);
-
-			for (int i = 0; i < files.size(); i++)
-				names.add(files[i].getFullPathName());
-
-			if (names.size())
-				filesDropped(names, 0, 0);
-		}
-	}
-	else if (res == 13)
-	{
-		FileChooser fc("Komodo Drop", File::getSpecialLocation(File::userDocumentsDirectory));
-		if (fc.browseForDirectory())
-		{
-			File dir = fc.getResult();
-
-			Array<File> files;
-			StringArray names;
-			dir.findChildFiles(files, File::findFiles, true);
-
-			for (int i = 0; i < files.size(); i++)
-				names.add(files[i].getFullPathName());
-
-			if (names.size())
-				filesDropped(names, 0, 0);
-		}
-	}
-	else if (res == 19)
-	{
-		FileChooser fc("Komodo Drop", File::getSpecialLocation(File::userDocumentsDirectory));
-		if (fc.browseForDirectory())
-		{
-			File dir = fc.getResult();
-			
-			Array<File> folders;
-			dir.findChildFiles(folders, File::findDirectories, false);
-			
-			for (int i = 0; i < folders.size(); i++)
-			{
-				Array<File> files;
-				folders[i].findChildFiles(files, File::findFiles, true);
-				
-				StringArray names;
-				for (int j = 0; j < files.size(); j++)
-					names.add(files[j].getFullPathName());
-				
-				if (names.size())
-					filesDropped(names, 0, 0);
-			}
-		}		
+		chooseFilesToUpload (res);
 	}
 	else if (res == 14)
 	{
@@ -505,48 +479,85 @@ void UploadWindow::handleCommand(int res)
 	{
 		smugMug.clearLogFile();
 	}
-	else if (res == 16)
-	{
-		if (!smugMug.isLoggedIn())
-			smugMug.login();
-
-		OwnedArray<Album> albums;
-		smugMug.getAlbumList(albums);
-		if (albums.size() > 0)
-		{
-			ComboBox* album = new ComboBox("");
-			album->setSize(300, 26);
-			album->setVisible(true);
-
-			for (int i = 0; i < albums.size(); i++)
-				album->addItem(albums[i]->getDisplayTitle(), i + 1);
-			album->setSelectedItemIndex(0);
-			
-			AlertWindow aw("Komodo Drop", "Delete duplicate images from album:", AlertWindow::InfoIcon);
-			aw.addCustomComponent(album);
-			aw.addButton("ok", 1);
-			aw.addButton("cancel", 2);
-
-			if (aw.runModalLoop() == 1)
-			{
-				smugMug.deleteDuplicates(albums[album->getSelectedId() - 1]->id);
-			}
-			delete album;
-		}
-	}
 	else if (res == 17)
 	{
 		smugMug.showQueue();
 	}
 	else if (res == 18)
 	{
-		if (!smugMug.isLoggedIn())
-			smugMug.login();
-
-		smugMug.showTopPhotos();
+		withLogin ([safeThis] { safeThis->smugMug.showTopPhotos(); });
 	}
 }
 
+void UploadWindow::chooseFilesToUpload (int mode)
+{
+	fileChooser = std::make_unique<FileChooser> ("Komodo Drop",
+		File::getSpecialLocation(File::userDocumentsDirectory));
+
+	int flags = FileBrowserComponent::openMode;
+
+	if (mode == 11)
+		flags |= FileBrowserComponent::canSelectFiles | FileBrowserComponent::canSelectMultipleItems;
+	else
+		flags |= FileBrowserComponent::canSelectDirectories;
+
+	Component::SafePointer<UploadWindow> safeThis (this);
+
+	fileChooser->launchAsync (flags, [safeThis, mode] (const FileChooser& fc)
+	{
+		if (safeThis == nullptr)
+			return;
+
+		StringArray names;
+
+		if (mode == 11)
+		{
+			for (auto& f : fc.getResults())
+				names.add(f.getFullPathName());
+
+			if (names.size())
+				safeThis->filesDropped(names, 0, 0);
+
+			return;
+		}
+
+		File dir = fc.getResult();
+
+		if (! dir.isDirectory())
+			return;
+
+		if (mode == 19)
+		{
+			// Each sub folder becomes its own upload, so they land in separate albums.
+			Array<File> folders;
+			dir.findChildFiles(folders, File::findDirectories, false);
+
+			for (int i = 0; i < folders.size(); i++)
+			{
+				Array<File> files;
+				folders[i].findChildFiles(files, File::findFiles, true);
+
+				StringArray folderNames;
+				for (int j = 0; j < files.size(); j++)
+					folderNames.add(files[j].getFullPathName());
+
+				if (folderNames.size())
+					safeThis->filesDropped(folderNames, 0, 0);
+			}
+
+			return;
+		}
+
+		Array<File> files;
+		dir.findChildFiles(files, File::findFiles, mode == 13);
+
+		for (int i = 0; i < files.size(); i++)
+			names.add(files[i].getFullPathName());
+
+		if (names.size())
+			safeThis->filesDropped(names, 0, 0);
+	});
+}
 
 bool UploadWindow::isInterestedInFileDrag(const StringArray& files)
 {
@@ -558,7 +569,7 @@ void UploadWindow::filesDropped(const StringArray& filenames, int mouseX, int mo
 	StringArray extensions;
 	extensions.addTokens(".jpg;.jpeg;.jpe;.png;.tif;.tiff;.png;.gif;.mpg;.mpeg;.mpe;.mov;.qt;.avi;.wmv", ";", "");
 
-	UploadRequest* ur = new UploadRequest();
+	auto ur = std::make_unique<UploadRequest>();
 	for (int i = 0; i < filenames.size(); i++)
 	{
 		File imageFile(File::getCurrentWorkingDirectory().getChildFile (filenames[i]));
@@ -580,88 +591,113 @@ void UploadWindow::filesDropped(const StringArray& filenames, int mouseX, int mo
 		}
 	}
 
-	if (ur->getNumImages() > 0)
-	{
-		if (!smugMug.isLoggedIn())
-			smugMug.login();
+	if (ur->getNumImages() == 0)
+		return;
 
-		if (!smugMug.isLoggedIn())
+	String defaultAlbumName;
+	File root(filenames[0]);
+	if (filenames.size() == 1 && root.isDirectory())
+		defaultAlbumName = root.getFileName();
+	else 
+		defaultAlbumName = root.getParentDirectory().getFileName();
+
+   #ifdef JUCE_DEBUG
+	defaultAlbumName = defaultAlbumName.replaceCharacter('_', ' ');
+   #endif
+
+	Component::SafePointer<UploadWindow> safeThis (this);
+	auto* request = ur.release();
+
+	smugMug.ensureLoggedIn ([safeThis, request, defaultAlbumName] (bool loggedIn)
+	{
+		if (safeThis == nullptr)
 		{
-			AlertWindow::showMessageBox(AlertWindow::WarningIcon, "Komodo Drop", "Error: Unable to connect to Smugmug.");
+			delete request;
 			return;
 		}
 
-		String defaultAlbumName;
-		File root(filenames[0]);
-		if (filenames.size() == 1 && root.isDirectory())
-			defaultAlbumName = root.getFileName();
-		else 
-			defaultAlbumName = root.getParentDirectory().getFileName();
-
-       #ifdef JUCE_DEBUG
-		defaultAlbumName = defaultAlbumName.replaceCharacter('_', ' ');
-       #endif
-
-		SmugID albumId;
-		bool open = false;
-		if (Settings::getInstance()->silentUpload)
+		if (! loggedIn)
 		{
-			OwnedArray<Album> albums;
-			smugMug.getAlbumList(albums);
-			
-			for (int i = 0; i < albums.size(); i++)
-			{
-				if (albums[i]->title == defaultAlbumName)
-				{
-					albumId = albums[i]->id;
-					break;
-				}
-			}
-			if (albumId.id == -1)
-			{
-				StringPairArray params;
-				albumId = smugMug.createAlbum(defaultAlbumName, 0, params);
-			}
-			ur->setName(defaultAlbumName);
+			delete request;
+			showMessageAsync (MessageBoxIconType::WarningIcon, "Komodo Drop",
+				"Error: Unable to connect to Smugmug.");
+			return;
 		}
-		else
-		{
-			bool newAlbum;
-			int catId;
-			String title;
-			StringPairArray params;
 
-			UploadDialog* ud = new UploadDialog(&smugMug, defaultAlbumName, newAlbum, title, albumId, catId, params, open);
-			if (ud->runModalLoop() == 1)
+		safeThis->chooseUploadDestination (request, defaultAlbumName);
+	});
+}
+
+void UploadWindow::chooseUploadDestination (UploadRequest* ur, const String& defaultAlbumName)
+{
+	if (Settings::getInstance()->silentUpload)
+	{
+		SmugID albumId;
+
+		OwnedArray<Album> albums;
+		smugMug.getAlbumList(albums);
+
+		for (int i = 0; i < albums.size(); i++)
+		{
+			if (albums[i]->title == defaultAlbumName)
 			{
-				ur->setName(title);
-				if (newAlbum)
-					albumId = smugMug.createAlbum(title, catId, params);
+				albumId = albums[i]->id;
+				break;
 			}
-			else
+		}
+
+		if (albumId.id == -1)
+		{
+			StringPairArray params;
+			albumId = smugMug.createAlbum(defaultAlbumName, 0, params);
+		}
+
+		ur->setName(defaultAlbumName);
+		startUpload (ur, albumId, false);
+		return;
+	}
+
+	// The dialog writes into `ctx`, which the callback keeps alive for it.
+	auto ctx = std::make_shared<UploadDialogContext>();
+
+	auto* ud = new UploadDialog (&smugMug, defaultAlbumName, ctx->newAlbum, ctx->title,
+	                             ctx->albumId, ctx->catId, ctx->params, ctx->open);
+
+	Component::SafePointer<UploadWindow> safeThis (this);
+
+	ud->enterModalState (true, ModalCallbackFunction::create (
+		[safeThis, ur, ctx] (int result)
+		{
+			if (safeThis == nullptr || result != 1)
 			{
+				delete ur;
 				return;
 			}
-		}
 
-		if (albumId.id != -1)
-		{
-			ur->setOpenBrowser(open);
-			ur->setAlbumId(albumId);
-			smugMug.uploadImages(ur);
-			startTimer(333);
-			repaint();
-		}
-		else
-		{
-			delete ur;
-		}
-	}
-	else
+			ur->setName(ctx->title);
+
+			auto albumId = ctx->albumId;
+
+			if (ctx->newAlbum)
+				albumId = safeThis->smugMug.createAlbum(ctx->title, ctx->catId, ctx->params);
+
+			safeThis->startUpload (ur, albumId, ctx->open);
+		}), true);
+}
+
+void UploadWindow::startUpload (UploadRequest* ur, SmugID albumId, bool openBrowser)
+{
+	if (albumId.id == -1)
 	{
 		delete ur;
+		return;
 	}
-	return;
+
+	ur->setOpenBrowser(openBrowser);
+	ur->setAlbumId(albumId);
+	smugMug.uploadImages(ur);
+	startTimer(333);
+	repaint();
 }
 
 void UploadWindow::timerCallback()
@@ -675,10 +711,20 @@ void UploadWindow::timerCallback()
 		int failures = smugMug.getNumFailedUploads();
 		if (failures > 0)
 		{
-			if (AlertWindow::showOkCancelBox(AlertWindow::WarningIcon, "Komodo Drop", String(failures) + " images failed to upload. Try again?", "yes", "no") == 1)
-				smugMug.reSubmitFailedUploads();
-			else
-				smugMug.cancelFailedUploads();
+			Component::SafePointer<UploadWindow> safeThis (this);
+
+			showConfirmAsync (MessageBoxIconType::WarningIcon, "Komodo Drop",
+				String(failures) + " images failed to upload. Try again?", "yes", "no",
+				[safeThis] (bool retry)
+				{
+					if (safeThis == nullptr)
+						return;
+
+					if (retry)
+						safeThis->smugMug.reSubmitFailedUploads();
+					else
+						safeThis->smugMug.cancelFailedUploads();
+				});
 		}
 	}
 }

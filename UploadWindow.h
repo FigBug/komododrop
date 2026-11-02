@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "Smugmug.h"
+
+struct UploadDialogContext;
 
 class UploadDialog : public DialogWindow
 {
@@ -52,8 +54,25 @@ private:
 	void handleCommand(int cmd);
 	PopupMenu createMenu();
 
+	/** Runs `fn` once there's a SmugMug session, doing nothing if the user
+	    cancels or authorization fails. */
+	void withLogin (std::function<void()> fn);
+
+	/** Menu items 11/12/13/19 — each picks files or a folder, then uploads. */
+	void chooseFilesToUpload (int mode);
+
+	/** Post-login half of filesDropped(): picks the destination album, either
+	    silently or via the upload dialog. Takes ownership of `ur`. */
+	void chooseUploadDestination (UploadRequest* ur, const String& defaultAlbumName);
+
+	/** Hands `ur` to SmugMug, or discards it if there's no album to upload to. */
+	void startUpload (UploadRequest* ur, SmugID albumId, bool openBrowser);
+
 	SmugMug smugMug;
 	Component* trayIcon;
 	ComponentDragger dragger;
 	bool drag;
+
+	// FileChooser::launchAsync needs the chooser to outlive the call.
+	std::unique_ptr<FileChooser> fileChooser;
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 class SmugMug;
 class DupeThread;
@@ -181,7 +181,12 @@ public:
 	SmugMug();
 	~SmugMug();
 
-	void login();
+	/** Makes sure we have an access token, authorizing via the browser + PIN
+	    dialog if we don't. Returns immediately; `callback` runs on the message
+	    thread with the result. Safe to call while an authorization is already in
+	    flight — the callbacks queue up behind the one request.
+	*/
+	void ensureLoggedIn (std::function<void (bool)> callback);
 	void logout();
 	bool isLoggedIn();
 	void cancelUploads();
@@ -231,7 +236,8 @@ private:
 	friend class UploadThread;
 	friend class LogDialog;
 
-    void authorizeIfNeeded();
+    void authorize (std::function<void (bool)> callback);
+    void finishAuthorize (bool success);
     StringPairArray getRequestToken();
     StringPairArray getAccessToken (const StringPairArray& requestToken);
     
@@ -249,4 +255,7 @@ private:
 	Array<Thread*> dupeThreads;
 
 	OwnedArray<LogItem> smugLog;
+
+	bool authorizing = false;
+	std::vector<std::function<void (bool)>> authCallbacks;
 };

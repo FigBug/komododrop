@@ -1,0 +1,5 @@
+## 0.0.0.7
+
+Updated to JUCE 9 and the current Gin.
+Replaced all blocking modal dialogs with asynchronous ones.
+Moved to a CMake build with signed, notarized installers for macOS and Windows.

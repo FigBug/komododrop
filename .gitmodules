@@ -1,6 +1,6 @@
 [submodule "modules/JUCE"]
 	path = modules/JUCE
-	url = git@github.com:WeAreROLI/JUCE.git
+	url = https://github.com/juce-framework/JUCE.git
 [submodule "modules/Gin"]
 	path = modules/Gin
-	url = git@github.com:FigBug/Gin.git
+	url = https://github.com/FigBug/Gin.git

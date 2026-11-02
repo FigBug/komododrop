@@ -71,7 +71,7 @@ SettingsComponent::SettingsComponent ()
     label.reset (new Label ("label",
                             TRANS("upload threads:")));
     addAndMakeVisible (label.get());
-    label->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
+    label->setFont (Font (FontOptions (15.0f).withStyle ("Regular")));
     label->setJustificationType (Justification::centredLeft);
     label->setEditable (false, false, false);
     label->setColour (TextEditor::textColourId, Colours::black);

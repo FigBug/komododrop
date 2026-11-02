@@ -23,6 +23,7 @@
 //[/Headers]
 
 #include "UploadComponent.h"
+#include "AsyncDialogs.h"
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
@@ -75,7 +76,7 @@ UploadComponent::UploadComponent (UploadDialog* ud_)
     label.reset (new Label ("new label",
                             TRANS("category:")));
     addAndMakeVisible (label.get());
-    label->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
+    label->setFont (Font (FontOptions (15.0f).withStyle ("Regular")));
     label->setJustificationType (Justification::centredLeft);
     label->setEditable (false, false, false);
     label->setColour (TextEditor::textColourId, Colours::black);
@@ -86,7 +87,7 @@ UploadComponent::UploadComponent (UploadDialog* ud_)
     label2.reset (new Label ("new label",
                              TRANS("sub category:")));
     addAndMakeVisible (label2.get());
-    label2->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
+    label2->setFont (Font (FontOptions (15.0f).withStyle ("Regular")));
     label2->setJustificationType (Justification::centredLeft);
     label2->setEditable (false, false, false);
     label2->setColour (TextEditor::textColourId, Colours::black);
@@ -129,7 +130,7 @@ UploadComponent::UploadComponent (UploadDialog* ud_)
     label3.reset (new Label ("new label",
                              TRANS("description:")));
     addAndMakeVisible (label3.get());
-    label3->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
+    label3->setFont (Font (FontOptions (15.0f).withStyle ("Regular")));
     label3->setJustificationType (Justification::centredLeft);
     label3->setEditable (false, false, false);
     label3->setColour (TextEditor::textColourId, Colours::black);
@@ -152,7 +153,7 @@ UploadComponent::UploadComponent (UploadDialog* ud_)
     label4.reset (new Label ("new label",
                              TRANS("keywords:")));
     addAndMakeVisible (label4.get());
-    label4->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
+    label4->setFont (Font (FontOptions (15.0f).withStyle ("Regular")));
     label4->setJustificationType (Justification::centredLeft);
     label4->setEditable (false, false, false);
     label4->setColour (TextEditor::textColourId, Colours::black);
@@ -175,7 +176,7 @@ UploadComponent::UploadComponent (UploadDialog* ud_)
     label5.reset (new Label ("new label",
                              TRANS("sort:")));
     addAndMakeVisible (label5.get());
-    label5->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
+    label5->setFont (Font (FontOptions (15.0f).withStyle ("Regular")));
     label5->setJustificationType (Justification::centredLeft);
     label5->setEditable (false, false, false);
     label5->setColour (TextEditor::textColourId, Colours::black);
@@ -314,7 +315,7 @@ UploadComponent::UploadComponent (UploadDialog* ud_)
     label6.reset (new Label ("new label",
                              TRANS("password:")));
     addAndMakeVisible (label6.get());
-    label6->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
+    label6->setFont (Font (FontOptions (15.0f).withStyle ("Regular")));
     label6->setJustificationType (Justification::centredLeft);
     label6->setEditable (false, false, false);
     label6->setColour (TextEditor::textColourId, Colours::black);
@@ -337,7 +338,7 @@ UploadComponent::UploadComponent (UploadDialog* ud_)
     label7.reset (new Label ("new label",
                              TRANS("password hint:")));
     addAndMakeVisible (label7.get());
-    label7->setFont (Font (15.00f, Font::plain).withTypefaceStyle ("Regular"));
+    label7->setFont (Font (FontOptions (15.0f).withStyle ("Regular")));
     label7->setJustificationType (Justification::centredLeft);
     label7->setEditable (false, false, false);
     label7->setColour (TextEditor::textColourId, Colours::black);
@@ -609,7 +610,6 @@ void UploadComponent::buttonClicked (Button* buttonThatWasClicked)
     {
         //[UserButtonCode_cancel] -- add your button handler code here..
 		getParentComponent()->exitModalState(0);
-		delete getParentComponent();
         //[/UserButtonCode_cancel]
     }
     else if (buttonThatWasClicked == ok.get())
@@ -705,7 +705,6 @@ void UploadComponent::buttonClicked (Button* buttonThatWasClicked)
 		settings->save();
 
 		getParentComponent()->exitModalState(1);
-		delete getParentComponent();
         //[/UserButtonCode_ok]
     }
     else if (buttonThatWasClicked == ascending.get())
@@ -786,39 +785,41 @@ void UploadComponent::buttonClicked (Button* buttonThatWasClicked)
     else if (buttonThatWasClicked == addcat.get())
     {
         //[UserButtonCode_addcat] -- add your button handler code here..
-		AlertWindow aw(("Komodo Drop"), ("Create category:"), AlertWindow::InfoIcon);
-		aw.addTextEditor(("name"), "", ("category name:"));
-		aw.addButton(("ok"), 1);
-		aw.addButton(("cancel"), 2);
+		Component::SafePointer<UploadComponent> safeThis (this);
 
-		if (aw.runModalLoop() == 1 && aw.getTextEditorContents(("name")).isNotEmpty())
-		{
-			int id = ud->smugMug->createCategory(aw.getTextEditorContents(("name")));
-			if (id > 0)
+		showChooserAsync (("Create category:"), {}, {}, ("category name:"),
+			[safeThis] (int, String name)
 			{
-				category->addItem(aw.getTextEditorContents(("name")), id + 1);
-				category->setSelectedId(id + 1);
-			}
-		}
+				if (safeThis == nullptr)
+					return;
+
+				int id = safeThis->ud->smugMug->createCategory(name);
+				if (id > 0)
+				{
+					safeThis->category->addItem(name, id + 1);
+					safeThis->category->setSelectedId(id + 1);
+				}
+			});
         //[/UserButtonCode_addcat]
     }
     else if (buttonThatWasClicked == addsubcat.get())
     {
         //[UserButtonCode_addsubcat] -- add your button handler code here..
-		AlertWindow aw(("Komodo Drop"), ("Create sub category:"), AlertWindow::InfoIcon);
-		aw.addTextEditor(("name"), "", ("sub category name:"));
-		aw.addButton(("ok"), 1);
-		aw.addButton(("cancel"), 2);
+		Component::SafePointer<UploadComponent> safeThis (this);
 
-		if (aw.runModalLoop() == 1 && aw.getTextEditorContents(("name")).isNotEmpty())
-		{
-			int id = ud->smugMug->createSubCategory(category->getSelectedId() - 1, aw.getTextEditorContents(("name")));
-			if (id > 0)
+		showChooserAsync (("Create sub category:"), {}, {}, ("sub category name:"),
+			[safeThis] (int, String name)
 			{
-				subCategory->addItem(aw.getTextEditorContents(("name")), id + 1);
-				subCategory->setSelectedId(id + 1);
-			}
-		}
+				if (safeThis == nullptr)
+					return;
+
+				int id = safeThis->ud->smugMug->createSubCategory(safeThis->category->getSelectedId() - 1, name);
+				if (id > 0)
+				{
+					safeThis->subCategory->addItem(name, id + 1);
+					safeThis->subCategory->setSelectedId(id + 1);
+				}
+			});
         //[/UserButtonCode_addsubcat]
     }
     else if (buttonThatWasClicked == familyedit.get())

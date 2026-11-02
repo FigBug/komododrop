@@ -12,14 +12,10 @@ public:
 		centreWithSize(getWidth(), getHeight());
 	}
 
-	~SettingsDialog()
-	{
-		exitModalState(0);
-	}
-
 	void closeButtonPressed()
 	{
-		delete this;
+		// Deleted by the ModalComponentManager once the modal state unwinds.
+		exitModalState(0);
 	}
 };
 
@@ -113,6 +109,6 @@ void Settings::save()
 
 void Settings::showSettingsDialog()
 {
-	SettingsDialog* d = new SettingsDialog();
-	d->runModalLoop();	
+	auto* d = new SettingsDialog();
+	d->enterModalState (true, nullptr, true);
 }
