@@ -1,5 +1,8 @@
-## 0.0.0.7
+## 1.0.0
 
 Updated to JUCE 9 and the current Gin.
+Moved to the SmugMug API v2, as the old 1.3.0 REST API has been retired.
+Fixed uploads, which were never authenticated after the move to OAuth.
+Albums inside sub categories are now listed.
 Replaced all blocking modal dialogs with asynchronous ones.
 Moved to a CMake build with signed, notarized installers for macOS and Windows.

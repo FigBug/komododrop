@@ -42,7 +42,8 @@ public:
 
     const String getApplicationVersion()
     {
-        return ("0.0.0.7");
+        // Comes from the VERSION file by way of CMake.
+        return ProjectInfo::versionString;
     }
 	
 	void anotherInstanceStarted (const String& commandLine)

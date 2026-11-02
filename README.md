@@ -1,26 +1,47 @@
 KomodoDrop
 ==========
 
-Komodo Drop is small, light weight application for Windows, Mac OS X and Linux that makes it easy and fast to upload images to SmugMug. It also allows basic management of categories, sub categories and albums. Komodo Drop is free and open source. If you find it useful please let me know.
+Komodo Drop is a small, light weight application for Windows, macOS and Linux
+that makes it easy and fast to upload images to SmugMug. It also allows basic
+management of categories, sub categories and albums. Komodo Drop is free and
+open source. If you find it useful please let me know.
+
+Drop files or folders onto the window — or use the Upload menu — and Komodo Drop
+asks which album to put them in, creating it first if you want.
 
 Features
-Komodo Drop is still beta software; however, it is stable and full featured. It is ready to use today.
- 
-* Some key features include:
+========
+
 * Small and light weight
-* Multi platform: Windows, Mac OS X & Linux
+* Multi platform: Windows, macOS & Linux
 * Fast multi-threaded uploads
 * Resumeable uploads
 * Duplicate image detection
 * Create categories and sub categories
 * Delete albums, categories and sub categories
 
+Categories and sub categories are the top two levels of your SmugMug folder
+tree — SmugMug dropped the separate category concept when it moved to API v2,
+but the names stuck.
+
+First run
+=========
+
+Komodo Drop talks to SmugMug over OAuth, so the first launch opens your browser
+to authorize the app against your SmugMug account. SmugMug then shows a short
+code; paste it into the dialog Komodo Drop is waiting on. The access token is
+saved, so this only happens once.
+
 Downloads
 =========
 
-Version 0.0.0.5:  
-Windows: http://downloads.rabien.com/KomodoDrop.exe  
-Mac OS X: http://downloads.rabien.com/KomodoDrop.zip
+Installers for all three platforms are attached to each release:
+
+https://github.com/FigBug/komododrop/releases/latest
+
+* Windows — signed installer (.exe)
+* macOS — signed and notarized installer (.pkg)
+* Linux — tarball (.tar.gz)
 
 Building
 ========
