@@ -653,31 +653,33 @@ bool SmugMug::fetchAuthUser()
     return nickName.isNotEmpty();
 }
 
-bool SmugMug::listChildNodes (const String& nodeUri, Array<var>& nodes)
+bool SmugMug::listAll (const String& path, const String& locator, Array<var>& items)
 {
-    if (nodeUri.isEmpty())
+    if (path.isEmpty())
         return false;
 
     const int pageSize = 100;
+    const bool hasQuery = path.containsChar ('?');
 
     for (int start = 1;;)
     {
-        auto response = v2Request ("GET", nodeUri + "!children?start=" + String (start)
-                                                  + "&count=" + String (pageSize));
+        auto response = v2Request ("GET", path + (hasQuery ? "&" : "?")
+                                               + "start=" + String (start)
+                                               + "&count=" + String (pageSize));
 
         if (! response.isObject())
             return false;
 
-        auto node = response["Node"];
+        auto found = response[Identifier (locator)];
 
-        if (auto* array = node.getArray())
+        if (auto* array = found.getArray())
         {
-            for (auto& n : *array)
-                nodes.add (n);
+            for (auto& item : *array)
+                items.add (item);
         }
-        else if (node.isObject())
+        else if (found.isObject())
         {
-            nodes.add (node);
+            items.add (found);
         }
 
         // Pages.NextPage is simply absent on the last page.
@@ -688,6 +690,24 @@ bool SmugMug::listChildNodes (const String& nodeUri, Array<var>& nodes)
     }
 }
 
+// "/Road-Cycling/2024" -> "/Road-Cycling"; a top level path -> "" (the root).
+static String parentPathOf (const String& urlPath)
+{
+    return urlPath.upToLastOccurrenceOf ("/", false, false);
+}
+
+int SmugMug::folderIdForPath (const String& urlPath) const
+{
+    if (urlPath.isEmpty())
+        return -1;
+
+    for (auto& f : folders)
+        if (f.urlPath == urlPath)
+            return f.id;
+
+    return -1;
+}
+
 bool SmugMug::refreshFolders()
 {
     if (! fetchAuthUser())
@@ -696,58 +716,47 @@ bool SmugMug::refreshFolders()
     folders.clearQuick();
     albumNodes.clearQuick();
 
-    auto addChildrenOf = [this] (const String& parentNodeUri, int parentId)
+    // !folderlist and !albums each return everything at any depth, so there's no
+    // need to walk the node tree a level at a time -- which also means albums
+    // nested deeper than the UI's two levels still show up.
+    Array<var> folderItems;
+
+    if (! listAll ("/api/v2/folder/user/" + nickName + "!folderlist", "FolderList", folderItems))
+        return false;
+
+    for (auto& item : folderItems)
     {
-        Array<var> children;
+        Folder f;
+        f.name    = item["Name"].toString();
+        f.urlPath = item["UrlPath"].toString();
+        f.uri     = "/api/v2/folder/user/" + nickName + f.urlPath;
+        f.id      = smugIdForUri (f.uri);
 
-        if (! listChildNodes (parentNodeUri, children))
-            return;
+        if (f.urlPath.isNotEmpty() && f.id != -1)
+            folders.add (f);
+    }
 
-        for (auto& n : children)
-        {
-            auto type = n["Type"].toString();
+    // Link folders to their parents by path, now that they're all known.
+    for (auto& f : folders)
+        f.parentId = folderIdForPath (parentPathOf (f.urlPath));
 
-            if (type == "Folder")
-            {
-                Folder f;
-                f.name     = n["Name"].toString();
-                f.nodeUri  = uriOf (n["Uri"]);
-                // A folder node exposes its folder object as either Folder or
-                // FolderByID depending on how the node was reached.
-                f.uri      = uriOf (n["Uris"]["Folder"]);
+    Array<var> albumItems;
 
-                if (f.uri.isEmpty())
-                    f.uri = uriOf (n["Uris"]["FolderByID"]);
+    if (! listAll ("/api/v2/user/" + nickName + "!albums", "Album", albumItems))
+        return false;
 
-                f.id       = smugIdForUri (f.nodeUri);
-                f.parentId = parentId;
+    for (auto& item : albumItems)
+    {
+        AlbumNode a;
+        a.name           = item["Name"].toString();
+        a.id.uri         = uriOf (item["Uri"]);
+        a.id.key         = item["AlbumKey"].toString();
+        a.id.id          = smugIdForUri (a.id.uri);
+        a.parentFolderId = folderIdForPath (parentPathOf (item["UrlPath"].toString()));
 
-                if (f.uri.isNotEmpty() && f.id != -1)
-                    folders.add (f);
-            }
-            else if (type == "Album")
-            {
-                AlbumNode a;
-                a.name           = n["Name"].toString();
-                a.id.uri         = uriOf (n["Uris"]["Album"]);
-                a.id.key         = a.id.uri.fromLastOccurrenceOf ("/", false, false);
-                a.id.id          = smugIdForUri (a.id.uri);
-                a.parentFolderId = parentId;
-
-                if (a.id.uri.isNotEmpty())
-                    albumNodes.add (a);
-            }
-        }
-    };
-
-    addChildrenOf (rootNodeUri, -1);
-
-    // Snapshot the top level before adding to `folders`, so the loop isn't
-    // walking an array that's being appended to.
-    const Array<Folder> topLevel (folders);
-
-    for (auto& top : topLevel)
-        addChildrenOf (top.nodeUri, top.id);
+        if (a.id.uri.isNotEmpty())
+            albumNodes.add (a);
+    }
 
     return true;
 }
@@ -823,7 +832,15 @@ bool SmugMug::getImageUrls (SmugID id, ImageUrls& urls)
     if (id.uri.isEmpty())
         return false;
 
-    auto sizes = v2Request ("GET", id.uri + "!sizes")["ImageSizes"];
+    // !sizes hangs off the image route, not the album-image one: an album image
+    // uri is /api/v2/album/<ak>/image/<ik>-0, and appending !sizes to that 404s.
+    // Its last segment is the image id, so rebuild the uri around that.
+    auto imageId = id.uri.fromLastOccurrenceOf ("/", false, false);
+
+    if (imageId.isEmpty())
+        return false;
+
+    auto sizes = v2Request ("GET", "/api/v2/image/" + imageId + "!sizes")["ImageSizes"];
 
     if (! sizes.isObject())
         return false;
@@ -981,21 +998,25 @@ bool SmugMug::getAlbumList (OwnedArray<Album>& albums)
         album->categoryId    = -1;
         album->subCategoryId = -1;
 
-        if (auto* parent = folderForId (node.parentFolderId))
+        // Walk from the album's folder up to the root, so the category is always
+        // the top level folder and the sub category the one below it, however
+        // deeply the album is actually nested.
+        Array<const Folder*> ancestors;
+
+        for (auto* f = folderForId (node.parentFolderId); f != nullptr;
+             f = f->parentId == -1 ? nullptr : folderForId (f->parentId))
+            ancestors.insert (0, f);
+
+        if (ancestors.size() >= 1)
         {
-            if (parent->parentId == -1)
-            {
-                // Directly under the root: the folder is the category.
-                album->category   = parent->name;
-                album->categoryId = parent->id;
-            }
-            else if (auto* grandParent = folderForId (parent->parentId))
-            {
-                album->category      = grandParent->name;
-                album->categoryId    = grandParent->id;
-                album->subCategory   = parent->name;
-                album->subCategoryId = parent->id;
-            }
+            album->category   = ancestors[0]->name;
+            album->categoryId = ancestors[0]->id;
+        }
+
+        if (ancestors.size() >= 2)
+        {
+            album->subCategory   = ancestors[1]->name;
+            album->subCategoryId = ancestors[1]->id;
         }
 
         albums.add (album);

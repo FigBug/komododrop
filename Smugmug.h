@@ -270,8 +270,8 @@ private:
 		int id = -1;
 		int parentId = -1;
 		String name;
-		String uri;      // /api/v2/folder/user/<nick>/<path>
-		String nodeUri;  // /api/v2/node/<id>
+		String uri;      // /api/v2/folder/user/<nick><urlPath>
+		String urlPath;  // /Road-Cycling/2024, as SmugMug spells it in urls
 	};
 
 	/** An album found while walking the folder tree, with the folder it lives in.
@@ -290,8 +290,12 @@ private:
 	bool refreshFolders();
 	const Folder* folderForId (int id) const;
 
-	/** Lists the child nodes of a node uri, following pagination. */
-	bool listChildNodes (const String& nodeUri, Array<var>& nodes);
+	/** Fetches every object from a paginated v2 endpoint, following NextPage.
+	    `locator` is the key the objects live under, e.g. "Album". */
+	bool listAll (const String& path, const String& locator, Array<var>& items);
+
+	/** The id of the folder at `urlPath`, or -1 for the root / an unknown path. */
+	int folderIdForPath (const String& urlPath) const;
 
 	/** POSTs a new child folder or album under `parentFolderUri`. */
 	var createNode (const String& parentFolderUri, const String& type,

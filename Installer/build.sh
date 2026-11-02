@@ -230,10 +230,13 @@ else
     ISCC="/c/Program Files/Inno Setup 6/ISCC.exe"
   fi
 
-  # ISCC is a native Windows binary, so an MSYS path like /d/a/... is parsed as a
-  # switch rather than a filename. Run it from the script's own directory and pass
-  # a bare relative name.
-  ( cd "$PROJECT_ROOT/Installer/win" && "$ISCC" "/DMyAppVersion=$VERSION" "KomodoDrop.iss" )
+  # ISCC is a native Windows binary and Git Bash rewrites arguments that look like
+  # unix paths, which mangles both "/DName=Value" switches and absolute script
+  # paths. Hand the version over in a generated include and run ISCC from the
+  # script's own directory with a bare relative name.
+  printf '#define MyAppVersion "%s"\n' "$VERSION" > "$PROJECT_ROOT/Installer/win/version.iss"
+
+  ( cd "$PROJECT_ROOT/Installer/win" && "$ISCC" "KomodoDrop.iss" )
 
   EXE_OUT="$STAGE/${APP_NAME}.exe"
 

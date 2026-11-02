@@ -173,3 +173,4 @@ Builds/
 deploy/
 logs/
 Installer/*/bin/
+Installer/win/version.iss
